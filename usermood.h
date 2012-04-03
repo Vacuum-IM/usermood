@@ -37,8 +37,9 @@
 #define USERMOOD_UUID "{df730f89-9cb1-472a-b61b-aea95594fde1}"
 #define PEP_USERMOOD              4010
 
-struct MoodData
+class MoodData
 {
+public:
     QString name;
     QIcon icon;
 //    bool operator==(const MoodData &AOther) const {
