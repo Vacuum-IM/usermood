@@ -12,7 +12,7 @@ userMoodDialog::userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMa
     QMap<QString, MoodData>::const_iterator it = AMoodsCatalog.constBegin();
     for (;it != AMoodsCatalog.constEnd(); ++it)
     {
-        ui.cmbMood->addItem(it.name,it.key);
+		ui.cmbMood->addItem(it->name,it.key());
     }
 
     int pos;
@@ -33,7 +33,7 @@ userMoodDialog::userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMa
 void userMoodDialog::onDialogAccepted()
 {
  
-    QString moodKey = ui.cmbMood->itemData(currentIndex()).toString();
+    QString moodKey = ui.cmbMood->itemData(ui.cmbMood->currentIndex()).toString(); 
     QString moodText = ui.pteText->toPlainText();
     FUserMood->isSetMood(FStreamJid, moodKey, moodText);
 
