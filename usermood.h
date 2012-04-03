@@ -4,8 +4,8 @@
 
 #include <definitions.h>
 
-#include <usermooddialog.h>
-#include <ui_usermooddialog.h>
+#include "usermooddialog.h"
+#include "ui_usermooddialog.h"
 
 #include <interfaces/ipluginmanager.h>
 #include <interfaces/imainwindow.h>
@@ -39,10 +39,16 @@
 
 struct MoodData
 {
-	int num;
-	QString code_name;
-	QString localized_name;
+    QString name;
+    QIcon icon;
+//    bool operator==(const MoodData &AOther) const {
+//        return name==AOther.name;
+//    }
+//    bool operator!=(const MoodData &AOther) const {
+//        return !operator==(AOther);
+//    }
 };
+
 
 class UserMood :
         public QObject,
@@ -66,7 +72,7 @@ public:
 
     //IPEPHandler
     virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
-    void isSetMood(const Jid &streamJid, const QString &moodName, const QString &moodText);
+    void isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText);
 
 protected slots:
 //    void onOptionsOpened();
@@ -104,7 +110,7 @@ private:
 
     //QMap<int, QVariant> FMoodCatalog;
 
-    QMap<QString, QString> FMoodsCatalog;
+    QMap<QString, MoodData> FMoodsCatalog;
     //QMap<Jid, QPair<QString, QString> > FStreamMood;
     QMap<QString, QPair<QString, QString> > FContactMood;
 

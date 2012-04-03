@@ -30,19 +30,19 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
         APluginInfo->version = "0.1";
         APluginInfo->author = "Alexey Ivanov";
         APluginInfo->homePage = "http://www.vacuum-im.org";
-	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
-	APluginInfo->dependences.append(MAINWINDOW_UUID);
+        APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
+        APluginInfo->dependences.append(MAINWINDOW_UUID);
 }
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 {
     AInitOrder=501;
 
-	IPlugin *plugin = APluginManager->pluginInterface("IMainWindowPlugin").value(0);
-	if (plugin)
-	{
-		FMainWindowPlugin = qobject_cast<IMainWindowPlugin *>(plugin->instance());
-	}
+    IPlugin *plugin = APluginManager->pluginInterface("IMainWindowPlugin").value(0);
+    if (plugin)
+    {
+	    FMainWindowPlugin = qobject_cast<IMainWindowPlugin *>(plugin->instance());
+    }
 
     plugin = APluginManager->pluginInterface("IPEPManager").value(0);
     if (plugin)
@@ -148,87 +148,169 @@ bool UserMood::initObjects()
         FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(label);
     }
 
-	FMoodsCatalog.insert("_remove_mood", tr("Without Mood"));
-    FMoodsCatalog.insert("afraid", tr("Afraid"));
-    FMoodsCatalog.insert("amazed", tr("Amazed"));
-    FMoodsCatalog.insert("angry", tr("Angry"));
-    FMoodsCatalog.insert("amorous", tr("Amorous"));
-    FMoodsCatalog.insert("annoyed", tr("Annoyed"));
-    FMoodsCatalog.insert("anxious", tr("Anxious"));
-    FMoodsCatalog.insert("aroused", tr("Aroused"));
-    FMoodsCatalog.insert("ashamed", tr("Ashamed"));
-    FMoodsCatalog.insert("bored", tr("Bored"));
-    FMoodsCatalog.insert("brave", tr("Brave"));
-    FMoodsCatalog.insert("calm", tr("Calm"));
-    FMoodsCatalog.insert("cautious", tr("Cautious"));
-    FMoodsCatalog.insert("cold", tr("Cold"));
-    FMoodsCatalog.insert("confident", tr("Confident"));
-    FMoodsCatalog.insert("confused", tr("Confused"));
-    FMoodsCatalog.insert("contemplative", tr("Contemplative"));
-    FMoodsCatalog.insert("contented", tr("Contented"));
-    FMoodsCatalog.insert("cranky", tr("Cranky"));
-    FMoodsCatalog.insert("crazy", tr("Crazy"));
-    FMoodsCatalog.insert("creative", tr("Creative"));
-    FMoodsCatalog.insert("curious", tr("Curious"));
-    FMoodsCatalog.insert("dejected", tr("Dejected"));
-    FMoodsCatalog.insert("depressed", tr("Depressed"));
-    FMoodsCatalog.insert("disappointed", tr("Disappointed"));
-    FMoodsCatalog.insert("disgusted", tr("Disgusted"));
-    FMoodsCatalog.insert("dismayed", tr("Dismayed"));
-    FMoodsCatalog.insert("distracted", tr("Distracted"));
-    FMoodsCatalog.insert("embarrassed", tr("Embarrassed"));
-    FMoodsCatalog.insert("envious", tr("Envious"));
-    FMoodsCatalog.insert("excited", tr("Excited"));
-    FMoodsCatalog.insert("flirtatious", tr("Flirtatious"));
-    FMoodsCatalog.insert("frustrated", tr("Frustrated"));
-    FMoodsCatalog.insert("grumpy", tr("Grumpy"));
-    FMoodsCatalog.insert("guilty", tr("Guilty"));
-    FMoodsCatalog.insert("happy", tr("Happy"));
-    FMoodsCatalog.insert("hopeful", tr("Hopeful"));
-    FMoodsCatalog.insert("hot", tr("Hot"));
-    FMoodsCatalog.insert("humbled", tr("Humbled"));
-    FMoodsCatalog.insert("humiliated", tr("Humiliated"));
-    FMoodsCatalog.insert("hungry", tr("Hungry"));
-    FMoodsCatalog.insert("hurt", tr("Hurt"));
-    FMoodsCatalog.insert("impressed", tr("Impressed"));
-    FMoodsCatalog.insert("in_awe", tr("In awe"));
-    FMoodsCatalog.insert("in_love", tr("In love"));
-    FMoodsCatalog.insert("indignant", tr("Indignant"));
-    FMoodsCatalog.insert("interested", tr("Interested"));
-    FMoodsCatalog.insert("intoxicated", tr("Intoxicated"));
-    FMoodsCatalog.insert("invincible", tr("Invincible"));
-    FMoodsCatalog.insert("jealous", tr("Jealous"));
-    FMoodsCatalog.insert("lonely", tr("Lonely"));
-    FMoodsCatalog.insert("lucky", tr("Lucky"));
-    FMoodsCatalog.insert("mean", tr("Mean"));
-    FMoodsCatalog.insert("moody", tr("Moody"));
-    FMoodsCatalog.insert("nervous", tr("Nervous"));
-    FMoodsCatalog.insert("neutral", tr("Neutral"));
-    FMoodsCatalog.insert("offended", tr("Offended"));
-    FMoodsCatalog.insert("outraged", tr("Outraged"));
-    FMoodsCatalog.insert("playful", tr("Playful"));
-    FMoodsCatalog.insert("proud", tr("Proud"));
-    FMoodsCatalog.insert("relaxed", tr("Relaxed"));
-    FMoodsCatalog.insert("relieved", tr("Relieved"));
-    FMoodsCatalog.insert("remorseful", tr("Remorseful"));
-    FMoodsCatalog.insert("restless", tr("Restless"));
-    FMoodsCatalog.insert("sad", tr("Sad"));
-    FMoodsCatalog.insert("sarcastic", tr("Sarcastic"));
-    FMoodsCatalog.insert("serious", tr("Serious"));
-    FMoodsCatalog.insert("shocked", tr("Shocked"));
-    FMoodsCatalog.insert("shy", tr("Shy"));
-    FMoodsCatalog.insert("sick", tr("Sick"));
-    FMoodsCatalog.insert("sleepy", tr("Sleepy"));
-    FMoodsCatalog.insert("spontaneous", tr("Spontaneous"));
-    FMoodsCatalog.insert("stressed", tr("Stressed"));
-    FMoodsCatalog.insert("strong", tr("Strong"));
-    FMoodsCatalog.insert("surprised", tr("Surprised"));
-    FMoodsCatalog.insert("thankful", tr("Thankful"));
-    FMoodsCatalog.insert("thirsty", tr("Thirsty"));
-    FMoodsCatalog.insert("tired", tr("Tired"));
-    FMoodsCatalog.insert("undefined", tr("Undefined"));
-    FMoodsCatalog.insert("weak", tr("Weak"));
-    FMoodsCatalog.insert("worried", tr("Worried"));
+    MoodData data;
+    data.name = tr("Without mood");
+    FMoodsCatalog.insert(MOOD_NULL, data);
+    data.name = tr("Afraid");
+    FMoodsCatalog.insert(MOOD_AFRAID, data);
+    data.name = tr("Amazed");
+    FMoodsCatalog.insert(MOOD_AMAZED, data);
+    data.name = tr("Angry");
+    FMoodsCatalog.insert(MOOD_ANGRY, data);
+    data.name = tr("Amorous");
+    FMoodsCatalog.insert(MOOD_AMOROUS, data);
+    data.name = tr("Annoyed");
+    FMoodsCatalog.insert(MOOD_ANNOYED, data);
+    data.name = tr("Anxious");
+    FMoodsCatalog.insert(MOOD_ANXIOUS, data);
+    data.name = tr("Aroused");
+    FMoodsCatalog.insert(MOOD_AROUSED, data);
+    data.name = tr("Ashamed");
+    FMoodsCatalog.insert(MOOD_ASHAMED, data);
+    data.name = tr("Bored");
+    FMoodsCatalog.insert(MOOD_BORED, data);
+    data.name = tr("Brave");
+    FMoodsCatalog.insert(MOOD_BRAVE, data);
+    data.name = tr("Calm");
+    FMoodsCatalog.insert(MOOD_CALM, data);
+    data.name = tr("Cautious");
+    FMoodsCatalog.insert(MOOD_CAUTIOUS, data);
+    data.name = tr("Cold");
+    FMoodsCatalog.insert(MOOD_COLD, data);
+    data.name = tr("Confident");
+    FMoodsCatalog.insert(MOOD_CONFIDENT, data);
+    data.name = tr("Confused");
+    FMoodsCatalog.insert(MOOD_CONFUSED, data);
+    data.name = tr("Contemplative");
+    FMoodsCatalog.insert(MOOD_CONTEMPLATIVE, data);
+    data.name = tr("Contented");
+    FMoodsCatalog.insert(MOOD_CONTENTED, data);
+    data.name = tr("Cranky");
+    FMoodsCatalog.insert(MOOD_CRANKY, data);
+    data.name = tr("Crazy");
+    FMoodsCatalog.insert(MOOD_CRAZY, data);
+    data.name = tr("Creative");
+    FMoodsCatalog.insert(MOOD_CREATIVE, data);
+    data.name = tr("Curious");
+    FMoodsCatalog.insert(MOOD_CURIOUS, data);
+    data.name = tr("Dejected");
+    FMoodsCatalog.insert(MOOD_DEJECTED, data);
+    data.name = tr("Depressed");
+    FMoodsCatalog.insert(MOOD_DEPRESSED, data);
+    data.name = tr("Disappointed");
+    FMoodsCatalog.insert(MOOD_DISAPPOINTED, data);
+    data.name = tr("Disgusted");
+    FMoodsCatalog.insert(MOOD_DISGUSTED, data);
+    data.name = tr("Dismayed");
+    FMoodsCatalog.insert(MOOD_DISMAYED, data);
+    data.name = tr("Distracted");
+    FMoodsCatalog.insert(MOOD_DISTRACTED, data);
+    data.name = tr("Embarrassed");
+    FMoodsCatalog.insert(MOOD_EMBARRASSED, data);
+    data.name = tr("Envious");
+    FMoodsCatalog.insert(MOOD_ENVIOUS, data);
+    data.name = tr("Excited");
+    FMoodsCatalog.insert(MOOD_EXCITED, data);
+    data.name = tr("Flirtatious");
+    FMoodsCatalog.insert(MOOD_FLIRTATIOUS, data);
+    data.name = tr("Frustrated");
+    FMoodsCatalog.insert(MOOD_FRUSTRATED, data);
+    data.name = tr("Grumpy");
+    FMoodsCatalog.insert(MOOD_GRUMPY, data);
+    data.name = tr("Guilty");
+    FMoodsCatalog.insert(MOOD_GUILTY, data);
+    data.name = tr("Happy");
+    FMoodsCatalog.insert(MOOD_HAPPY, data);
+    data.name = tr("Hopeful");
+    FMoodsCatalog.insert(MOOD_HOPEFUL, data);
+    data.name = tr("Hot");
+    FMoodsCatalog.insert(MOOD_HOT, data);
+    data.name = tr("Humbled");
+    FMoodsCatalog.insert(MOOD_HUMBLED, data);
+    data.name = tr("Humiliated");
+    FMoodsCatalog.insert(MOOD_HUMILIATED, data);
+    data.name = tr("Hungry");
+    FMoodsCatalog.insert(MOOD_HUNGRY, data);
+    data.name = tr("Hurt");
+    FMoodsCatalog.insert(MOOD_HURT, data);
+    data.name = tr("Impressed");
+    FMoodsCatalog.insert(MOOD_IMPRESSED, data);
+    data.name = tr("In awe");
+    FMoodsCatalog.insert(MOOD_IN_AWE, data);
+    data.name = tr("In love");
+    FMoodsCatalog.insert(MOOD_IN_LOVE, data);
+    data.name = tr("Indignant");
+    FMoodsCatalog.insert(MOOD_INDIGNANT, data);
+    data.name = tr("Interested");
+    FMoodsCatalog.insert(MOOD_INTERESTED, data);
+    data.name = tr("Intoxicated");
+    FMoodsCatalog.insert(MOOD_INTOXICATED, data);
+    data.name = tr("Invincible");
+    FMoodsCatalog.insert(MOOD_INVINCIBLE, data);
+    data.name = tr("Jealous");
+    FMoodsCatalog.insert(MOOD_JEALOUS, data);
+    data.name = tr("Lonely");
+    FMoodsCatalog.insert(MOOD_LONELY, data);
+    data.name = tr("Lucky");
+    FMoodsCatalog.insert(MOOD_LUCKY, data);
+    data.name = tr("Mean");
+    FMoodsCatalog.insert(MOOD_MEAN, data);
+    data.name = tr("Moody");
+    FMoodsCatalog.insert(MOOD_MOODY, data);
+    data.name = tr("Nervous");
+    FMoodsCatalog.insert(MOOD_NERVOUS, data);
+    data.name = tr("Neutral");
+    FMoodsCatalog.insert(MOOD_NEUTRAL, data);
+    data.name = tr("Offended");
+    FMoodsCatalog.insert(MOOD_OFFENDED, data);
+    data.name = tr("Outraged");
+    FMoodsCatalog.insert(MOOD_OUTRAGED, data);
+    data.name = tr("Playful");
+    FMoodsCatalog.insert(MOOD_PLAYFUL, data);
+    data.name = tr("Proud");
+    FMoodsCatalog.insert(MOOD_PROUD, data);
+    data.name = tr("Relaxed");
+    FMoodsCatalog.insert(MOOD_RELAXED, data);
+    data.name = tr("Relieved");
+    FMoodsCatalog.insert(MOOD_RELIEVED, data);
+    data.name = tr("Remorseful");
+    FMoodsCatalog.insert(MOOD_REMORSEFUL, data);
+    data.name = tr("Restless");
+    FMoodsCatalog.insert(MOOD_RESTLESS, data);
+    data.name = tr("Sad");
+    FMoodsCatalog.insert(MOOD_SAD, data);
+    data.name = tr("Sarcastic");
+    FMoodsCatalog.insert(MOOD_SARCASTIC, data);
+    data.name = tr("Serious");
+    FMoodsCatalog.insert(MOOD_SERIOUS, data);
+    data.name = tr("Shocked");
+    FMoodsCatalog.insert(MOOD_SHOCKED, data);
+    data.name = tr("Shy");
+    FMoodsCatalog.insert(MOOD_SHY, data);
+    data.name = tr("Sick");
+    FMoodsCatalog.insert(MOOD_SICK, data);
+    data.name = tr("Sleepy");
+    FMoodsCatalog.insert(MOOD_SLEEPY, data);
+    data.name = tr("Spontaneous");
+    FMoodsCatalog.insert(MOOD_SPONTANEOUS, data);
+    data.name = tr("Stressed");
+    FMoodsCatalog.insert(MOOD_STRESSED, data);
+    data.name = tr("Strong");
+    FMoodsCatalog.insert(MOOD_STRONG, data);
+    data.name = tr("Surprised");
+    FMoodsCatalog.insert(MOOD_SURPRISED, data);
+    data.name = tr("Thankful");
+    FMoodsCatalog.insert(MOOD_THANKFUL, data);
+    data.name = tr("Thirsty");
+    FMoodsCatalog.insert(MOOD_THIRSTY, data);
+    data.name = tr("Tired");
+    FMoodsCatalog.insert(MOOD_TIRED, data);
+    data.name = tr("Undefined");
+    FMoodsCatalog.insert(MOOD_UNDEFINED, data);
+    data.name = tr("Weak");
+    FMoodsCatalog.insert(MOOD_WEAK, data);
+    data.name = tr("Worried");
+    FMoodsCatalog.insert(MOOD_WORRIED, data);
 
     return true;
 }
@@ -285,7 +367,7 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
     return true;
 }
 
-void UserMood::isSetMood(const Jid &streamJid, const QString &moodName, const QString &moodText)
+void UserMood::isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText)
 {
     QDomDocument doc("");
     QDomElement root = doc.createElement("item");
@@ -294,18 +376,18 @@ void UserMood::isSetMood(const Jid &streamJid, const QString &moodName, const QS
     QDomElement mood = doc.createElementNS(MOOD_PROTOCOL_URL, "mood"); 
     root.appendChild(mood);
 
-	if (moodName != FMoodsCatalog.value("_remove_mood"))
+    if (moodKey != MOOD_NULL)
 	{
-		QDomElement name = doc.createElement(FMoodsCatalog.key(moodName));
+        QDomElement name = doc.createElement(moodKey);
 		mood.appendChild(name);
 	}
 	else
-	{
+    {
 		QDomElement name = doc.createElement("");
 		mood.appendChild(name);
 	}
 
-	if (moodName != FMoodsCatalog.value("_remove_mood"))
+    if (moodKey != MOOD_NULL)
 	{
 		QDomElement text = doc.createElement("text");
 		mood.appendChild(text);
@@ -409,7 +491,7 @@ void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiM
         if (!FContactMood.value(contactJid).first.isEmpty())
         {
             QString text = FContactMood.value(contactJid).second;
-            QString tip = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(FMoodsCatalog.value(FContactMood.value(contactJid).first)).arg(text.replace("\n","<br>"));
+            QString tip = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(FMoodsCatalog.value(FContactMood.value(contactJid).first).name).arg(text.replace("\n","<br>"));
             AToolTips.insert(RTTO_USERMOOD,tip);
         }
     }

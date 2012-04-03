@@ -10,12 +10,14 @@
 
 class UserMood;
 
+class MoodData;
+
 class userMoodDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    userMoodDialog(const QMap<QString, QString> &AMoodsCatalog, QMap<QString, QPair<QString, QString> > &AContactMood, Jid &streamJid, UserMood *AUserMood, QWidget *parent = 0);
+    userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, QPair<QString, QString> > &AContactMood, Jid &streamJid, UserMood *AUserMood, QWidget *parent = 0);
     ~userMoodDialog();
 
 protected slots:
@@ -23,7 +25,7 @@ protected slots:
     
 private:
     Ui::userMoodDialog ui;
-	UserMood *FUserMood;
+    UserMood *FUserMood;
 
 	Jid FStreamJid;
 };
