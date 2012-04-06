@@ -1,41 +1,41 @@
 #ifndef USERMOOD_H
 #define USERMOOD_H
 
-
 #include <definitions.h>
-
 #include "usermooddialog.h"
 #include "ui_usermooddialog.h"
 
-#include <interfaces/ipluginmanager.h>
 #include <interfaces/imainwindow.h>
-#include <interfaces/ipepmanager.h>
-#include <interfaces/iservicediscovery.h>
-#include <interfaces/ixmppstreams.h>
-#include <interfaces/ioptionsmanager.h>
 #include <interfaces/inotifications.h>
+#include <interfaces/ioptionsmanager.h>
+#include <interfaces/ipepmanager.h>
+#include <interfaces/ipluginmanager.h>
 #include <interfaces/ipresence.h>
 #include <interfaces/iroster.h>
 #include <interfaces/irostersmodel.h>
 #include <interfaces/irostersview.h>
+#include <interfaces/iservicediscovery.h>
+#include <interfaces/ixmppstreams.h>
 
-#include <definitions/notificationtypes.h>
+#include <definitions/menuicons.h>
 #include <definitions/notificationdataroles.h>
 #include <definitions/notificationtypeorders.h>
-#include <definitions/menuicons.h>
+#include <definitions/notificationtypes.h>
+#include <definitions/optionvalues.h>
 #include <definitions/resources.h>
+#include <definitions/rosterindextyperole.h>
 #include <definitions/rosterlabelorders.h>
 #include <definitions/rostertooltiporders.h>
-#include <definitions/rosterindextyperole.h>
-#include <definitions/optionvalues.h>
 
-#include <utils/options.h>
 #include <utils/action.h>
 #include <utils/filestorage.h>
+#include <utils/iconstorage.h>
+#include <utils/menu.h>
+#include <utils/options.h>
 #include <utils/widgetmanager.h>
 
 #define USERMOOD_UUID "{df730f89-9cb1-472a-b61b-aea95594fde1}"
-#define PEP_USERMOOD              4010
+#define PEP_USERMOOD 4010
 
 class MoodData
 {
@@ -49,7 +49,6 @@ public:
 //        return !operator==(AOther);
 //    }
 };
-
 
 class UserMood :
         public QObject,

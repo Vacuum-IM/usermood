@@ -26,7 +26,7 @@ UserMood::~UserMood()
 void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
         APluginInfo->name = tr("User Mood");
-        APluginInfo->description = tr("TLDR");
+        APluginInfo->description = tr("Allows you to send and receive information about user moods");
         APluginInfo->version = "0.1";
         APluginInfo->author = "Alexey Ivanov";
         APluginInfo->homePage = "http://www.vacuum-im.org";
@@ -124,12 +124,16 @@ bool UserMood::initObjects()
     IDiscoFeature feature;
     feature.active = true;
     feature.name = tr("User mood");
+    feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
+    feature.description = tr("Supports the exchange of information about user moods");
     feature.var = MOOD_PROTOCOL_URL;
 
     FServiceDiscovery->insertDiscoFeature(feature);
 
     feature.name = tr("User mood notification");
     feature.var = MOOD_NOTIFY_PROTOCOL_URL;
+    feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
+    feature.description = tr("Supports the exchange of information about user moods");
     FServiceDiscovery->insertDiscoFeature(feature);
 
     if (FRostersViewPlugin)
@@ -152,164 +156,244 @@ bool UserMood::initObjects()
     data.name = tr("Without mood");
     FMoodsCatalog.insert(MOOD_NULL, data);
     data.name = tr("Afraid");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_AFRAID);
     FMoodsCatalog.insert(MOOD_AFRAID, data);
     data.name = tr("Amazed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_AMAZED);
     FMoodsCatalog.insert(MOOD_AMAZED, data);
     data.name = tr("Angry");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_ANGRY);
     FMoodsCatalog.insert(MOOD_ANGRY, data);
     data.name = tr("Amorous");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_AMOROUS);
     FMoodsCatalog.insert(MOOD_AMOROUS, data);
     data.name = tr("Annoyed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_ANNOYED);
     FMoodsCatalog.insert(MOOD_ANNOYED, data);
     data.name = tr("Anxious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_ANXIOUS);
     FMoodsCatalog.insert(MOOD_ANXIOUS, data);
     data.name = tr("Aroused");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_AROUSED);
     FMoodsCatalog.insert(MOOD_AROUSED, data);
     data.name = tr("Ashamed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_ASHAMED);
     FMoodsCatalog.insert(MOOD_ASHAMED, data);
     data.name = tr("Bored");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_BORED);
     FMoodsCatalog.insert(MOOD_BORED, data);
     data.name = tr("Brave");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_BRAVE);
     FMoodsCatalog.insert(MOOD_BRAVE, data);
     data.name = tr("Calm");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CALM);
     FMoodsCatalog.insert(MOOD_CALM, data);
     data.name = tr("Cautious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CAUTIOUS);
     FMoodsCatalog.insert(MOOD_CAUTIOUS, data);
     data.name = tr("Cold");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_COLD);
     FMoodsCatalog.insert(MOOD_COLD, data);
     data.name = tr("Confident");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CONFIDENT);
     FMoodsCatalog.insert(MOOD_CONFIDENT, data);
     data.name = tr("Confused");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CONFUSED);
     FMoodsCatalog.insert(MOOD_CONFUSED, data);
     data.name = tr("Contemplative");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CONTEMPLATIVE);
     FMoodsCatalog.insert(MOOD_CONTEMPLATIVE, data);
     data.name = tr("Contented");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CONTENTED);
     FMoodsCatalog.insert(MOOD_CONTENTED, data);
     data.name = tr("Cranky");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CRANKY);
     FMoodsCatalog.insert(MOOD_CRANKY, data);
     data.name = tr("Crazy");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CRAZY);
     FMoodsCatalog.insert(MOOD_CRAZY, data);
     data.name = tr("Creative");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CREATIVE);
     FMoodsCatalog.insert(MOOD_CREATIVE, data);
     data.name = tr("Curious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_CURIOUS);
     FMoodsCatalog.insert(MOOD_CURIOUS, data);
     data.name = tr("Dejected");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DEJECTED);
     FMoodsCatalog.insert(MOOD_DEJECTED, data);
     data.name = tr("Depressed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DEPRESSED);
     FMoodsCatalog.insert(MOOD_DEPRESSED, data);
     data.name = tr("Disappointed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DISAPPOINTED);
     FMoodsCatalog.insert(MOOD_DISAPPOINTED, data);
     data.name = tr("Disgusted");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DISGUSTED);
     FMoodsCatalog.insert(MOOD_DISGUSTED, data);
     data.name = tr("Dismayed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DISMAYED);
     FMoodsCatalog.insert(MOOD_DISMAYED, data);
     data.name = tr("Distracted");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_DISTRACTED);
     FMoodsCatalog.insert(MOOD_DISTRACTED, data);
     data.name = tr("Embarrassed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_EMBARRASSED);
     FMoodsCatalog.insert(MOOD_EMBARRASSED, data);
     data.name = tr("Envious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_ENVIOUS);
     FMoodsCatalog.insert(MOOD_ENVIOUS, data);
     data.name = tr("Excited");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_EXCITED);
     FMoodsCatalog.insert(MOOD_EXCITED, data);
     data.name = tr("Flirtatious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_FLIRTATIOUS);
     FMoodsCatalog.insert(MOOD_FLIRTATIOUS, data);
     data.name = tr("Frustrated");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_FRUSTRATED);
     FMoodsCatalog.insert(MOOD_FRUSTRATED, data);
     data.name = tr("Grumpy");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_GRUMPY);
     FMoodsCatalog.insert(MOOD_GRUMPY, data);
     data.name = tr("Guilty");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_GUILTY);
     FMoodsCatalog.insert(MOOD_GUILTY, data);
     data.name = tr("Happy");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HAPPY);
     FMoodsCatalog.insert(MOOD_HAPPY, data);
     data.name = tr("Hopeful");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HOPEFUL);
     FMoodsCatalog.insert(MOOD_HOPEFUL, data);
     data.name = tr("Hot");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HOT);
     FMoodsCatalog.insert(MOOD_HOT, data);
     data.name = tr("Humbled");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HUMBLED);
     FMoodsCatalog.insert(MOOD_HUMBLED, data);
     data.name = tr("Humiliated");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HUMILIATED);
     FMoodsCatalog.insert(MOOD_HUMILIATED, data);
     data.name = tr("Hungry");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HUNGRY);
     FMoodsCatalog.insert(MOOD_HUNGRY, data);
     data.name = tr("Hurt");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_HURT);
     FMoodsCatalog.insert(MOOD_HURT, data);
     data.name = tr("Impressed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_IMPRESSED);
     FMoodsCatalog.insert(MOOD_IMPRESSED, data);
     data.name = tr("In awe");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_IN_AWE);
     FMoodsCatalog.insert(MOOD_IN_AWE, data);
     data.name = tr("In love");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_IN_LOVE);
     FMoodsCatalog.insert(MOOD_IN_LOVE, data);
     data.name = tr("Indignant");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_INDIGNANT);
     FMoodsCatalog.insert(MOOD_INDIGNANT, data);
     data.name = tr("Interested");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_INTERESTED);
     FMoodsCatalog.insert(MOOD_INTERESTED, data);
     data.name = tr("Intoxicated");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_INTOXICATED);
     FMoodsCatalog.insert(MOOD_INTOXICATED, data);
     data.name = tr("Invincible");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_INVINCIBLE);
     FMoodsCatalog.insert(MOOD_INVINCIBLE, data);
     data.name = tr("Jealous");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_JEALOUS);
     FMoodsCatalog.insert(MOOD_JEALOUS, data);
     data.name = tr("Lonely");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_LONELY);
     FMoodsCatalog.insert(MOOD_LONELY, data);
     data.name = tr("Lucky");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_LUCKY);
     FMoodsCatalog.insert(MOOD_LUCKY, data);
     data.name = tr("Mean");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_MEAN);
     FMoodsCatalog.insert(MOOD_MEAN, data);
     data.name = tr("Moody");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_MOODY);
     FMoodsCatalog.insert(MOOD_MOODY, data);
     data.name = tr("Nervous");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_NERVOUS);
     FMoodsCatalog.insert(MOOD_NERVOUS, data);
     data.name = tr("Neutral");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_NEUTRAL);
     FMoodsCatalog.insert(MOOD_NEUTRAL, data);
     data.name = tr("Offended");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_OFFENDED);
     FMoodsCatalog.insert(MOOD_OFFENDED, data);
     data.name = tr("Outraged");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_OUTRAGED);
     FMoodsCatalog.insert(MOOD_OUTRAGED, data);
     data.name = tr("Playful");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_PLAYFUL);
     FMoodsCatalog.insert(MOOD_PLAYFUL, data);
     data.name = tr("Proud");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_PROUD);
     FMoodsCatalog.insert(MOOD_PROUD, data);
     data.name = tr("Relaxed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_RELAXED);
     FMoodsCatalog.insert(MOOD_RELAXED, data);
     data.name = tr("Relieved");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_RELIEVED);
     FMoodsCatalog.insert(MOOD_RELIEVED, data);
     data.name = tr("Remorseful");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_REMORSEFUL);
     FMoodsCatalog.insert(MOOD_REMORSEFUL, data);
     data.name = tr("Restless");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_RESTLESS);
     FMoodsCatalog.insert(MOOD_RESTLESS, data);
     data.name = tr("Sad");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SAD);
     FMoodsCatalog.insert(MOOD_SAD, data);
     data.name = tr("Sarcastic");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SARCASTIC);
     FMoodsCatalog.insert(MOOD_SARCASTIC, data);
     data.name = tr("Serious");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SERIOUS);
     FMoodsCatalog.insert(MOOD_SERIOUS, data);
     data.name = tr("Shocked");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SHOCKED);
     FMoodsCatalog.insert(MOOD_SHOCKED, data);
     data.name = tr("Shy");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SHY);
     FMoodsCatalog.insert(MOOD_SHY, data);
     data.name = tr("Sick");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SICK);
     FMoodsCatalog.insert(MOOD_SICK, data);
     data.name = tr("Sleepy");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SLEEPY);
     FMoodsCatalog.insert(MOOD_SLEEPY, data);
     data.name = tr("Spontaneous");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SPONTANEOUS);
     FMoodsCatalog.insert(MOOD_SPONTANEOUS, data);
     data.name = tr("Stressed");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_STRESSED);
     FMoodsCatalog.insert(MOOD_STRESSED, data);
     data.name = tr("Strong");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_STRONG);
     FMoodsCatalog.insert(MOOD_STRONG, data);
     data.name = tr("Surprised");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_SURPRISED);
     FMoodsCatalog.insert(MOOD_SURPRISED, data);
     data.name = tr("Thankful");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_THANKFUL);
     FMoodsCatalog.insert(MOOD_THANKFUL, data);
     data.name = tr("Thirsty");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_THIRSTY);
     FMoodsCatalog.insert(MOOD_THIRSTY, data);
     data.name = tr("Tired");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_TIRED);
     FMoodsCatalog.insert(MOOD_TIRED, data);
     data.name = tr("Undefined");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_UNDEFINED);
     FMoodsCatalog.insert(MOOD_UNDEFINED, data);
     data.name = tr("Weak");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_WEAK);
     FMoodsCatalog.insert(MOOD_WEAK, data);
     data.name = tr("Worried");
+    data.icon = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(UMI_WORRIED);
     FMoodsCatalog.insert(MOOD_WORRIED, data);
 
     return true;
@@ -418,7 +502,7 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, i
                                 if (show!=IPresence::Offline && show!=IPresence::Error && !features.contains(MOOD_PROTOCOL_URL))
                                 {
                                         Action *action = createSetMoodAction(streamJid,MOOD_PROTOCOL_URL,AMenu);
-                                        AMenu->addAction(action,100,true);
+                                        AMenu->addAction(action,AG_RVCM_USERMOOD,false);
                                 }
                         }
                 }
@@ -448,8 +532,6 @@ void UserMood::onSetMoodActionTriggered(bool)
             Jid streamJid = action->data(ADR_STREAM_JID).toString();
 			userMoodDialog *dialog;
             dialog = new userMoodDialog(FMoodsCatalog,FContactMood,streamJid,this);
-                    //userMoodDialog[streamJid].insert(contactJid,dialog);
-                    //connect(dialog,SIGNAL(dialogDestroyed()),SLOT(onEditNoteDialogDestroyed()));
             WidgetManager::showActivateRaiseWindow(dialog);
         }
 }
@@ -470,16 +552,15 @@ void UserMood::setContactLabel()
 {
     foreach (const QString &AContactJid, FContactMood.keys())
     {
-
         QMultiMap<int, QVariant> findData;
         findData.insert(RDR_TYPE,RIT_CONTACT);
         findData.insert(RDR_PREP_BARE_JID,AContactJid);
         foreach (IRosterIndex *index, FRostersModel->rootIndex()->findChilds(findData,true))
             if (!FContactMood.value(AContactJid).first.isEmpty() && (AContactJid == index->data(RDR_PREP_BARE_JID).toString())) /*Options::node(OPV_UT_SHOW_ROSTER_LABEL).value().toBool()*/
 
-            FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
-        else
-            FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
+                FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
+            else
+                FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
     }
 }
 
