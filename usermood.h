@@ -78,7 +78,7 @@ public:
     virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
     virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
 
-    virtual QIcon getIcoByBareJid(const QString &ABareJid) const;
+//    virtual QIcon getIcoByBareJid(const QString &ABareJid) const;
 
     //IPEPHandler
     virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);

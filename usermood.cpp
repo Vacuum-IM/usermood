@@ -441,7 +441,9 @@ QVariant UserMood::rosterData(const IRosterIndex *AIndex, int ARole) const
         qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
     if (ARole == RDR_MOOD_NAME)
     {
-        QIcon pic = getIcoByBareJid(AIndex->data(RDR_PREP_BARE_JID).toString());
+        QIcon pic;
+        pic = FMoodsCatalog.value(FContactMood.value(AIndex->data(RDR_PREP_BARE_JID).toString()).first).icon;
+        //pic = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(byname);
         return pic;
     }
     return QVariant();
@@ -456,16 +458,14 @@ bool UserMood::setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AV
     return false;
 }
 
-QIcon UserMood::getIcoByBareJid(const QString &ABareJid) const
-{
-     qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+//QIcon UserMood::getIcoByBareJid(const QString &ABareJid) const
+//{
+//     qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
 
-    QIcon pic;
-    QString byname = FMoodsCatalog.value(FContactMood.value(ABareJid).first).name;
-    pic = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(byname);
 
-    return pic;
-}
+
+//    return pic;
+//}
 
 bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 {
