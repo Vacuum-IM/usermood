@@ -11,7 +11,6 @@
 #include <interfaces/ipepmanager.h>
 #include <interfaces/ipluginmanager.h>
 #include <interfaces/ipresence.h>
-#include <interfaces/iroster.h>
 #include <interfaces/irostersmodel.h>
 #include <interfaces/irostersview.h>
 #include <interfaces/iservicediscovery.h>
@@ -23,6 +22,7 @@
 #include <definitions/notificationtypes.h>
 #include <definitions/optionvalues.h>
 #include <definitions/resources.h>
+#include <definitions/rosterdataholderorders.h>
 #include <definitions/rosterindextyperole.h>
 #include <definitions/rosterlabelorders.h>
 #include <definitions/rostertooltiporders.h>
@@ -53,10 +53,11 @@ public:
 class UserMood :
         public QObject,
         public IPlugin,
+        public IRosterDataHolder,
         public IPEPHandler
     {
         Q_OBJECT;
-        Q_INTERFACES(IPlugin IPEPHandler);
+        Q_INTERFACES(IPlugin IRosterDataHolder IPEPHandler);
 
 public:
     UserMood();
@@ -70,9 +71,22 @@ public:
 	virtual bool initSettings() { return true; }
 	virtual bool startPlugin() { return true; }
 
+    //IRosterDataHolder
+    virtual int rosterDataOrder() const;
+    virtual QList<int> rosterDataRoles() const;
+    virtual QList<int> rosterDataTypes() const;
+    virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
+    virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
+
+    virtual QIcon getIcoByBareJid(const QString &ABareJid) const;
+
     //IPEPHandler
     virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
     void isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText);
+
+signals:
+    //IRosterDataHolder
+    void rosterDataChanged(IRosterIndex *AIndex = NULL, int ARole = 0);
 
 protected slots:
 //    void onOptionsOpened();
@@ -82,14 +96,16 @@ protected slots:
 //    void onShowNotification(const QString &AContactJid);
 //    void onNotificationActivated(int ANotifyId);
 //    void onNotificationRemoved(int ANotifyId);
+    void onRosterIndexInserted(IRosterIndex *AIndex);
     void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
     void onSetMoodActionTriggered(bool);
     void onApplicationQuit();
 
 protected:
     Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
-    void setContactMood(const QString &AContactJid, const QString &AMoodName, const QString &AMoodText);
+    void setContactMood(const Jid &senderJid, const QString &AMoodName, const QString &AMoodText);
     void setContactLabel();
+    void updateDataHolder(const Jid &senderJid = Jid::null);
 
 
 private:
@@ -99,7 +115,6 @@ private:
     IServiceDiscovery *FServiceDiscovery;
     IXmppStreams *FXmppStreams;
     IOptionsManager *FOptionsManager;
-    IRosterPlugin *FRosterPlugin;
     IRostersModel *FRostersModel;
     IServiceDiscovery *FDiscovery;
     IRostersViewPlugin *FRostersViewPlugin;

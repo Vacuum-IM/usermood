@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #define ADR_STREAM_JID                  Action::DR_StreamJid
+#define RDR_MOOD_NAME                   452
 
 UserMood::UserMood()
 {
@@ -15,6 +16,10 @@ UserMood::UserMood()
     FXmppStreams = NULL;
     FOptionsManager = NULL;
     FDiscovery = NULL;
+    FRostersModel = NULL;
+    FRostersViewPlugin = NULL;
+
+    //FUserMoodLabelId = -1;
 
 }
 
@@ -36,7 +41,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 {
-    AInitOrder=501;
+    AInitOrder=11;
 
     IPlugin *plugin = APluginManager->pluginInterface("IMainWindowPlugin").value(0);
     if (plugin)
@@ -73,16 +78,14 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
             }
     }
 
-    plugin = APluginManager->pluginInterface("IRosterPlugin").value(0,NULL);
-    if (plugin)
-    {
-        FRosterPlugin = qobject_cast<IRosterPlugin *>(plugin->instance());
-    }
-
     plugin = APluginManager->pluginInterface("IRostersModel").value(0,NULL);
     if (plugin)
     {
         FRostersModel = qobject_cast<IRostersModel *>(plugin->instance());
+        if (FRostersModel)
+        {
+            connect(FRostersModel->instance(),SIGNAL(indexInserted(IRosterIndex *)), SLOT(onRosterIndexInserted(IRosterIndex *)));
+        }
     }
 
     plugin = APluginManager->pluginInterface("IRostersViewPlugin").value(0,NULL);
@@ -136,6 +139,11 @@ bool UserMood::initObjects()
     feature.description = tr("Supports the exchange of information about user moods");
     FServiceDiscovery->insertDiscoFeature(feature);
 
+    if (FRostersModel)
+    {
+        FRostersModel->insertDefaultDataHolder(this);
+    }
+
     if (FRostersViewPlugin)
     {
 	    connect(FRostersViewPlugin->rostersView()->instance(),SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, int, Menu *)),
@@ -146,10 +154,18 @@ bool UserMood::initObjects()
 
     if (FRostersViewPlugin)
     {
+        QMultiMap<int,QVariant> findData;
+        foreach(int type, rosterDataTypes())
+            findData.insertMulti(RDR_TYPE,type);
+        QList<IRosterIndex *> indexes = FRostersModel->rootIndex()->findChilds(findData, true);
+
         IRostersLabel label;
         label.order = RLO_USERMOOD;
-        label.value = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
+        label.value = RDR_MOOD_NAME;
         FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(label);
+
+        foreach (IRosterIndex *index, indexes)
+            FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, index);
     }
 
     MoodData data;
@@ -399,11 +415,61 @@ bool UserMood::initObjects()
     return true;
 }
 
+
+int UserMood::rosterDataOrder() const
+{
+        qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    return RDHO_DEFAULT;
+}
+
+QList<int> UserMood::rosterDataRoles() const
+{
+    qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    static const QList<int> indexRoles = QList<int>() << RDR_MOOD_NAME;
+    return indexRoles;
+}
+
+QList<int> UserMood::rosterDataTypes() const
+{
+        qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    static const QList<int> indexTypes = QList<int>() << RIT_STREAM_ROOT << RIT_CONTACT;
+    return indexTypes;
+}
+
+QVariant UserMood::rosterData(const IRosterIndex *AIndex, int ARole) const
+{
+        qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    if (ARole == RDR_MOOD_NAME)
+    {
+        QIcon pic = getIcoByBareJid(AIndex->data(RDR_PREP_BARE_JID).toString());
+        return pic;
+    }
+    return QVariant();
+}
+
+bool UserMood::setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue)
+{
+        qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    Q_UNUSED(AIndex);
+    Q_UNUSED(ARole);
+    Q_UNUSED(AValue);
+    return false;
+}
+
+QIcon UserMood::getIcoByBareJid(const QString &ABareJid) const
+{
+     qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+
+    QIcon pic;
+    QString byname = FMoodsCatalog.value(FContactMood.value(ABareJid).first).name;
+    pic = IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(byname);
+
+    return pic;
+}
+
 bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 {
-	Q_UNUSED(AStreamJid);
-
-    QString senderJid;
+    Jid senderJid;
     QString moodName;
     QString moodText;
 
@@ -509,7 +575,6 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, i
         }
 }
 
-
 Action *UserMood::createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const
 {
        if (AFeature == MOOD_PROTOCOL_URL)
@@ -536,31 +601,60 @@ void UserMood::onSetMoodActionTriggered(bool)
         }
 }
 
-void UserMood::setContactMood(const QString &AContactJid, const QString &AMoodName, const QString &AMoodText)
+void UserMood::setContactMood(const Jid &senderJid, const QString &AMoodName, const QString &AMoodText)
 {
-    if ((FContactMood.value(AContactJid).first != AMoodName) || FContactMood.value(AContactJid).second != AMoodText)
+            qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    if ((FContactMood.value(senderJid.pBare()).first != AMoodName) || FContactMood.value(senderJid.pBare()).second != AMoodText)
     {
         if (!AMoodName.isEmpty())
-            FContactMood.insert(AContactJid,QPair<QString, QString>(AMoodName,AMoodText));
+            FContactMood.insert(senderJid.pBare(),QPair<QString, QString>(AMoodName,AMoodText));
         else
-            FContactMood.remove(AContactJid);
+            FContactMood.remove(senderJid.pBare());
     }
-    setContactLabel();
+    updateDataHolder(senderJid);
 }
 
-void UserMood::setContactLabel()
-{
-    foreach (const QString &AContactJid, FContactMood.keys())
-    {
-        QMultiMap<int, QVariant> findData;
-        findData.insert(RDR_TYPE,RIT_CONTACT);
-        findData.insert(RDR_PREP_BARE_JID,AContactJid);
-        foreach (IRosterIndex *index, FRostersModel->rootIndex()->findChilds(findData,true))
-            if (!FContactMood.value(AContactJid).first.isEmpty() && (AContactJid == index->data(RDR_PREP_BARE_JID).toString())) /*Options::node(OPV_UT_SHOW_ROSTER_LABEL).value().toBool()*/
+//void UserMood::setContactLabel()
+//{
+//    foreach (const QString &AContactJid, FContactMood.keys())
+//    {
+//        QMultiMap<int, QVariant> findData;
+//        findData.insert(RDR_TYPE,RIT_CONTACT);
+//        findData.insert(RDR_PREP_BARE_JID,AContactJid);
+//        foreach (IRosterIndex *index, FRostersModel->rootIndex()->findChilds(findData,true))
+//            if (!FContactMood.value(AContactJid).first.isEmpty() && (AContactJid == index->data(RDR_PREP_BARE_JID).toString())) /*Options::node(OPV_UT_SHOW_ROSTER_LABEL).value().toBool()*/
+//                FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
+//            else
+//                FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
+//    }
+//}
 
-                FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
-            else
-                FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
+void UserMood::updateDataHolder(const Jid &senderJid)
+{
+        qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
+    if (FRostersModel)
+    {
+        QMultiMap<int,QVariant> findData;
+        foreach(int type, rosterDataTypes())
+            findData.insert(RDR_TYPE,type);
+        if (!senderJid.isEmpty())
+            findData.insert(RDR_PREP_BARE_JID,senderJid.pBare());
+        QList<IRosterIndex *> indexes = FRostersModel->rootIndex()->findChilds(findData,true);
+        foreach (IRosterIndex *index, indexes)
+        {
+            emit rosterDataChanged(index,RDR_MOOD_NAME);
+            qDebug() << "emit rosterDataChanged" << RDR_MOOD_NAME;
+        }
+    }
+}
+
+void UserMood::onRosterIndexInserted(IRosterIndex *AIndex)
+{
+
+    if (FRostersViewPlugin && rosterDataTypes().contains(AIndex->type()))
+    {
+            FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, AIndex);
+            qDebug() << "<" << __FILE__ << __FUNCTION__ << ">";
     }
 }
 
