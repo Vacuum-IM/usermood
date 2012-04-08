@@ -40,8 +40,8 @@
 class MoodData
 {
 public:
-    QString name;
-    QIcon icon;
+	QString name;
+	QIcon icon;
 //    bool operator==(const MoodData &AOther) const {
 //        return name==AOther.name;
 //    }
@@ -51,17 +51,17 @@ public:
 };
 
 class UserMood :
-        public QObject,
-        public IPlugin,
-        public IRosterDataHolder,
-        public IPEPHandler
-    {
-        Q_OBJECT;
-        Q_INTERFACES(IPlugin IRosterDataHolder IPEPHandler);
+	public QObject,
+	public IPlugin,
+	public IRosterDataHolder,
+	public IPEPHandler
+{
+	Q_OBJECT;
+	Q_INTERFACES(IPlugin IRosterDataHolder IPEPHandler);
 
 public:
-    UserMood();
-    ~UserMood();
+	UserMood();
+	~UserMood();
 	//IPlugin
 	virtual QObject *instance() { return this; }
 	virtual QUuid pluginUuid() const { return USERMOOD_UUID; }
@@ -71,64 +71,66 @@ public:
 	virtual bool initSettings() { return true; }
 	virtual bool startPlugin() { return true; }
 
-    //IRosterDataHolder
-    virtual int rosterDataOrder() const;
-    virtual QList<int> rosterDataRoles() const;
-    virtual QList<int> rosterDataTypes() const;
-    virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
-    virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
+	//IRosterDataHolder
+	virtual int rosterDataOrder() const;
+	virtual QList<int> rosterDataRoles() const;
+	virtual QList<int> rosterDataTypes() const;
+	virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
+	virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
 
 //    virtual QIcon getIcoByBareJid(const QString &ABareJid) const;
 
-    //IPEPHandler
-    virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
-    void isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText);
+	//IPEPHandler
+	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
+	void isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText);
 
 signals:
-    //IRosterDataHolder
-    void rosterDataChanged(IRosterIndex *AIndex = NULL, int ARole = 0);
+	//IRosterDataHolder
+	void rosterDataChanged(IRosterIndex *AIndex = NULL, int ARole = 0);
 
 protected slots:
 //    void onOptionsOpened();
 //    void onOptionsChanged(const OptionsNode &ANode);
 //    void onRosterIndexInserted(const Jid &AContactJid, const QString &AMood);
-    void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int,QString> &AToolTips);
+	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips);
 //    void onShowNotification(const QString &AContactJid);
 //    void onNotificationActivated(int ANotifyId);
 //    void onNotificationRemoved(int ANotifyId);
-    void onRosterIndexInserted(IRosterIndex *AIndex);
-    void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
-    void onSetMoodActionTriggered(bool);
-    void onApplicationQuit();
+	void onRosterIndexInserted(IRosterIndex *AIndex);
+	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
+	void onSetMoodActionTriggered(bool);
+	void onApplicationQuit();
 
 protected:
-    Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
-    void setContactMood(const Jid &senderJid, const QString &AMoodName, const QString &AMoodText);
-    void setContactLabel();
-    void updateDataHolder(const Jid &senderJid = Jid::null);
+	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
+	void setContactMood(const Jid &senderJid, const QString &AMoodName, const QString &AMoodText);
+	void setContactLabel();
+	void updateDataHolder(const Jid &senderJid = Jid::null);
 
 
 private:
-    IMainWindowPlugin *FMainWindowPlugin;
-    IPresencePlugin *FPresencePlugin;
-    IPEPManager *FPEPManager;
-    IServiceDiscovery *FServiceDiscovery;
-    IXmppStreams *FXmppStreams;
-    IOptionsManager *FOptionsManager;
-    IRostersModel *FRostersModel;
-    IServiceDiscovery *FDiscovery;
-    IRostersViewPlugin *FRostersViewPlugin;
-    INotifications *FNotifications;
+	IMainWindowPlugin *FMainWindowPlugin;
+	IPresencePlugin *FPresencePlugin;
+	IPEPManager *FPEPManager;
+	IServiceDiscovery *FServiceDiscovery;
+	IXmppStreams *FXmppStreams;
+	IOptionsManager *FOptionsManager;
+	IRostersModel *FRostersModel;
+	IServiceDiscovery *FDiscovery;
+	IRostersViewPlugin *FRostersViewPlugin;
+	INotifications *FNotifications;
 
-    int handlerId;
-    int FUserMoodLabelId;
+	int handlerId;
+	int FUserMoodLabelId;
 
-    //QMap<int, QVariant> FMoodCatalog;
+	//QMap<int, QVariant> FMoodCatalog;
 
-    QMap<QString, MoodData> FMoodsCatalog;
-    //QMap<Jid, QPair<QString, QString> > FStreamMood;
-    QMap<QString, QPair<QString, QString> > FContactMood;
+	QMap<QString, MoodData> FMoodsCatalog;
+	//QMap<Jid, QPair<QString, QString> > FStreamMood;
+	QMap<QString, QPair<QString, QString> > FContactMood;
 
 };
 
 #endif // USERMOOD_H
+
+
