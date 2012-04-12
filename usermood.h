@@ -40,14 +40,15 @@
 class MoodData
 {
 public:
-	QString name;
+	QString locname;
 	QIcon icon;
-//    bool operator==(const MoodData &AOther) const {
-//        return name==AOther.name;
-//    }
-//    bool operator!=(const MoodData &AOther) const {
-//        return !operator==(AOther);
-//    }
+};
+
+class MoodContact
+{
+public:
+	QString keyname;
+	QString text;
 };
 
 class UserMood :
@@ -82,7 +83,7 @@ public:
 
 	//IPEPHandler
 	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
-	void isSetMood(const Jid &streamJid, const QString &moodKey, const QString &moodText);
+	void isSetMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
 
 signals:
 	//IRosterDataHolder
@@ -103,9 +104,8 @@ protected slots:
 
 protected:
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
-	void setContactMood(const Jid &senderJid, const QString &AMoodName, const QString &AMoodText);
-	void setContactLabel();
-	void updateDataHolder(const Jid &senderJid = Jid::null);
+	void setContactMood(const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
+	void updateDataHolder(const Jid &ASenderJid = Jid::null);
 
 
 private:
@@ -123,11 +123,8 @@ private:
 	int handlerId;
 	int FUserMoodLabelId;
 
-	//QMap<int, QVariant> FMoodCatalog;
-
 	QMap<QString, MoodData> FMoodsCatalog;
-	//QMap<Jid, QPair<QString, QString> > FStreamMood;
-	QMap<QString, QPair<QString, QString> > FContactMood;
+	QMap<QString, MoodContact> FContactsMood;
 
 };
 

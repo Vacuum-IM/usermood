@@ -2,7 +2,6 @@
 #define USERMOODDIALOG_H
 
 #include <QDialog>
-#include <QPair>
 #include <utils/jid.h>
 
 #include "usermood.h"
@@ -11,13 +10,14 @@
 class UserMood;
 
 class MoodData;
+class MoodContact;
 
 class userMoodDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, QPair<QString, QString> > &AContactMood, Jid &streamJid, UserMood *AUserMood, QWidget *parent = 0);
+	userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, UserMood *AUserMood, QWidget *parent = 0);
 	~userMoodDialog();
 
 protected slots:
