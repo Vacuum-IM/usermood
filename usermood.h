@@ -40,6 +40,11 @@
 class MoodData
 {
 public:
+	MoodData() {}
+	MoodData(const QString &locname)
+	: locname(locname) {}
+	MoodData(const QString &icon, const QString &locname)
+	: locname(locname), icon(IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(icon)) {}
 	QString locname;
 	QIcon icon;
 };
