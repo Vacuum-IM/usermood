@@ -143,6 +143,17 @@ bool UserMood::initObjects()
 	feature.description = tr("Supports the exchange of information about user moods");
 	FServiceDiscovery->insertDiscoFeature(feature);
 
+	if (FNotifications)
+	{
+		INotificationType notifyType;
+		notifyType.order = NTO_USERMOOD_NOTIFY;
+		notifyType.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
+		notifyType.title = tr("When receiving mood");
+		notifyType.kindMask = INotification::PopupWindow;
+		notifyType.kindDefs = notifyType.kindMask;
+		FNotifications->registerNotificationType(NNT_USERMOOD,notifyType);
+	}
+
 	if(FRostersModel)
 	{
 		FRostersModel->insertDefaultDataHolder(this);
@@ -303,34 +314,28 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 	{
 		ASenderJid = replyElem.attribute("from");
 		QDomElement eventElem = replyElem.firstChildElement("event");
-
 		if(!eventElem.isNull())
 		{
 			QDomElement itemsElem = eventElem.firstChildElement("items");
-
 			if(!itemsElem.isNull())
 			{
 				QDomElement itemElem = itemsElem.firstChildElement("item");
-
 				if(!itemElem.isNull())
 				{
 					QDomElement moodElem = itemElem.firstChildElement("mood");
-
 					if(!moodElem.isNull())
 					{
 						QDomElement choiseElem = moodElem.firstChildElement();
-
 						if(!choiseElem.isNull() && FMoodsCatalog.contains(moodElem.firstChildElement().nodeName()))
 						{
 							AMoodName = moodElem.firstChildElement().nodeName();
 						}
-
 						QDomElement textElem = moodElem.firstChildElement("text");
-
 						if(!moodElem.isNull())
 						{
 							AMoodText = textElem.text();
 						}
+						onShowNotification(AStreamJid, ASenderJid);
 					}
 				}
 			}
@@ -370,7 +375,44 @@ void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QSt
 		text.appendChild(t1);
 	}
 
-    FPEPManager->publishItem(AstreamJid, MOOD_PROTOCOL_URL, root);
+	FPEPManager->publishItem(AstreamJid, MOOD_PROTOCOL_URL, root);
+}
+
+void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
+{
+	if (FNotifications && FNotifications->notifications().isEmpty() && FContactsMood.contains(AContactJid.pBare()))
+	{
+		INotification notify;
+		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
+		if ((notify.kinds & INotification::PopupWindow) > 0)
+		{
+			notify.typeId = NNT_USERMOOD;
+			notify.data.insert(NDR_ICON,FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).icon);
+			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
+			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(AStreamJid, AContactJid));
+			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
+
+			//notify.data.insert(NDR_POPUP_HTML,TODO);
+
+			FNotifies.insert(FNotifications->appendNotification(notify),AContactJid);
+		}
+	}
+}
+
+void UserMood::onNotificationActivated(int ANotifyId)
+{
+	if (FNotifies.contains(ANotifyId))
+	{
+		FNotifications->removeNotification(ANotifyId);
+	}
+}
+
+void UserMood::onNotificationRemoved(int ANotifyId)
+{
+	if (FNotifies.contains(ANotifyId))
+	{
+		FNotifies.remove(ANotifyId);
+	}
 }
 
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
@@ -422,8 +464,8 @@ void UserMood::onSetMoodActionTriggered(bool)
 	if(action)
 	{
 		Jid AStreamJid = action->data(ADR_STREAM_JID).toString();
-		userMoodDialog *dialog;
-        dialog = new userMoodDialog(this, FMoodsCatalog, FContactsMood, AStreamJid);
+		UserMoodDialog *dialog;
+		dialog = new UserMoodDialog(this, FMoodsCatalog, FContactsMood, AStreamJid);
 		WidgetManager::showActivateRaiseWindow(dialog);
 	}
 }
@@ -464,7 +506,6 @@ void UserMood::updateDataHolder(const Jid &ASenderJid)
 
 void UserMood::onRosterIndexInserted(IRosterIndex *AIndex)
 {
-
 	if(FRostersViewPlugin && rosterDataTypes().contains(AIndex->type()))
 	{
 		FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, AIndex);
@@ -491,6 +532,3 @@ void UserMood::onApplicationQuit()
 }
 
 Q_EXPORT_PLUGIN2(plg_pepmanager, UserMood)
-
-
-

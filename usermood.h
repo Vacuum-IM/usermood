@@ -36,12 +36,12 @@
 class UserMood :
 	public QObject,
 	public IPlugin,
-    public IUserMood,
+	public IUserMood,
 	public IRosterDataHolder,
 	public IPEPHandler
 {
 	Q_OBJECT;
-    Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IPEPHandler);
+	Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IPEPHandler);
 
 public:
 	UserMood();
@@ -62,13 +62,11 @@ public:
 	virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
 	virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
 
-//    virtual QIcon getIcoByBareJid(const QString &ABareJid) const;
-
 	//IPEPHandler
 	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
 
-    //IUserMood
-    virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
+	//IUserMood
+	virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
 
 signals:
 	//IRosterDataHolder
@@ -79,9 +77,9 @@ protected slots:
 //    void onOptionsChanged(const OptionsNode &ANode);
 //    void onRosterIndexInserted(const Jid &AContactJid, const QString &AMood);
 	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips);
-//    void onShowNotification(const QString &AContactJid);
-//    void onNotificationActivated(int ANotifyId);
-//    void onNotificationRemoved(int ANotifyId);
+	void onShowNotification(const Jid &AStreamJid, const Jid &AContectJid);
+	void onNotificationActivated(int ANotifyId);
+	void onNotificationRemoved(int ANotifyId);
 	void onRosterIndexInserted(IRosterIndex *AIndex);
 	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
 	void onSetMoodActionTriggered(bool);
@@ -90,8 +88,9 @@ protected slots:
 protected:
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
 	void setContactMood(const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
-	void updateDataHolder(const Jid &ASenderJid = Jid::null);
 
+	//IRosterDataHolder
+	void updateDataHolder(const Jid &ASenderJid = Jid::null);
 
 private:
 	IMainWindowPlugin *FMainWindowPlugin;
@@ -108,6 +107,7 @@ private:
 	int handlerId;
 	int FUserMoodLabelId;
 
+	QMap<int, Jid> FNotifies;
 	QMap<QString, MoodData> FMoodsCatalog;
 	QMap<QString, MoodContact> FContactsMood;
 

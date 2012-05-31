@@ -10,20 +10,20 @@
 #include "iusermood.h"
 #include "ui_usermooddialog.h"
 
-class userMoodDialog : public QDialog
+class UserMoodDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-    userMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *AParent = 0);
-	~userMoodDialog();
+	UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *AParent = 0);
+	~UserMoodDialog();
 
 protected slots:
 	void onDialogAccepted();
 
 private:
-	Ui::userMoodDialog ui;
-    IUserMood *FUserMood;
+	Ui::UserMoodDialog ui;
+	IUserMood *FUserMood;
 
 	Jid FStreamJid;
 };

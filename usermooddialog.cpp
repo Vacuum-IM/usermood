@@ -1,15 +1,14 @@
 #include "usermooddialog.h"
 
-userMoodDialog::userMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
+UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
 {
 	ui.setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	setWindowTitle(tr("Set mood"));
 	IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->insertAutoIcon(this, MNI_USERMOOD, 0, 0, "windowIcon");
 
-    FUserMood = AUserMood;
+	FUserMood = AUserMood;
 	FStreamJid = AStreamJid;
-
 
 	QMap<QString, MoodData>::const_iterator it = AMoodsCatalog.constBegin();
 	for(; it != AMoodsCatalog.constEnd(); ++it)
@@ -35,19 +34,17 @@ userMoodDialog::userMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodDat
 
 	connect(ui.dbbButtons, SIGNAL(accepted()), SLOT(onDialogAccepted()));
 	connect(ui.dbbButtons, SIGNAL(rejected()), SLOT(reject()));
-
 }
 
-void userMoodDialog::onDialogAccepted()
+void UserMoodDialog::onDialogAccepted()
 {
 	QString AMoodKey = ui.cmbMood->itemData(ui.cmbMood->currentIndex()).toString();
 	QString AMoodText = ui.pteText->toPlainText();
-    FUserMood->setMood(FStreamJid, AMoodKey, AMoodText);
+	FUserMood->setMood(FStreamJid, AMoodKey, AMoodText);
 	accept();
 }
 
-userMoodDialog::~userMoodDialog()
+UserMoodDialog::~UserMoodDialog()
 {
 
 }
-

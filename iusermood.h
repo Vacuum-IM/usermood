@@ -14,25 +14,25 @@
 class MoodData
 {
 public:
-    MoodData() {}
-    MoodData(const QString &locname) : locname(locname) {}
-    MoodData(const QString &icon, const QString &locname) : locname(locname), icon(IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(icon)) {}
-    QString locname;
-    QIcon icon;
+	MoodData() {}
+	MoodData(const QString &locname) : locname(locname) {}
+	MoodData(const QString &icon, const QString &locname) : locname(locname), icon(IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(icon)) {}
+	QString locname;
+	QIcon icon;
 };
 
 class MoodContact
 {
 public:
-    QString keyname;
-    QString text;
+	QString keyname;
+	QString text;
 };
 
 class IUserMood
 {
 public:
-        virtual QObject *instance() = 0;
-        virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText) = 0;
+	virtual QObject *instance() = 0;
+	virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText) = 0;
 //signals:
 };
 
