@@ -2,22 +2,20 @@
 #define USERMOODDIALOG_H
 
 #include <QDialog>
+
+#include <definitions/resources.h>
+#include <utils/iconstorage.h>
 #include <utils/jid.h>
 
-#include "usermood.h"
+#include "iusermood.h"
 #include "ui_usermooddialog.h"
-
-class UserMood;
-
-class MoodData;
-class MoodContact;
 
 class userMoodDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	userMoodDialog(const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, UserMood *AUserMood, QWidget *parent = 0);
+    userMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *AParent = 0);
 	~userMoodDialog();
 
 protected slots:
@@ -25,7 +23,7 @@ protected slots:
 
 private:
 	Ui::userMoodDialog ui;
-	UserMood *FUserMood;
+    IUserMood *FUserMood;
 
 	Jid FStreamJid;
 };

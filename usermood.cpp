@@ -341,7 +341,7 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 	return true;
 }
 
-void UserMood::isSetMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText)
+void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QString &AMoodText)
 {
 	QDomDocument doc("");
 	QDomElement root = doc.createElement("item");
@@ -370,7 +370,7 @@ void UserMood::isSetMood(const Jid &streamJid, const QString &AMoodKey, const QS
 		text.appendChild(t1);
 	}
 
-	FPEPManager->publishItem(streamJid, MOOD_PROTOCOL_URL, root);
+    FPEPManager->publishItem(AstreamJid, MOOD_PROTOCOL_URL, root);
 }
 
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
@@ -423,7 +423,7 @@ void UserMood::onSetMoodActionTriggered(bool)
 	{
 		Jid AStreamJid = action->data(ADR_STREAM_JID).toString();
 		userMoodDialog *dialog;
-		dialog = new userMoodDialog(FMoodsCatalog, FContactsMood, AStreamJid, this);
+        dialog = new userMoodDialog(this, FMoodsCatalog, FContactsMood, AStreamJid);
 		WidgetManager::showActivateRaiseWindow(dialog);
 	}
 }

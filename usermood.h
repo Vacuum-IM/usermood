@@ -1,7 +1,8 @@
 #ifndef USERMOOD_H
 #define USERMOOD_H
 
-#include <definitions.h>
+#include "definitions.h"
+#include "iusermood.h"
 #include "usermooddialog.h"
 #include "ui_usermooddialog.h"
 
@@ -28,42 +29,19 @@
 #include <definitions/rostertooltiporders.h>
 
 #include <utils/action.h>
-#include <utils/filestorage.h>
-#include <utils/iconstorage.h>
 #include <utils/menu.h>
 #include <utils/options.h>
 #include <utils/widgetmanager.h>
 
-#define USERMOOD_UUID "{df730f89-9cb1-472a-b61b-aea95594fde1}"
-#define PEP_USERMOOD 4010
-
-class MoodData
-{
-public:
-	MoodData() {}
-	MoodData(const QString &locname)
-	: locname(locname) {}
-	MoodData(const QString &icon, const QString &locname)
-	: locname(locname), icon(IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(icon)) {}
-	QString locname;
-	QIcon icon;
-};
-
-class MoodContact
-{
-public:
-	QString keyname;
-	QString text;
-};
-
 class UserMood :
 	public QObject,
 	public IPlugin,
+    public IUserMood,
 	public IRosterDataHolder,
 	public IPEPHandler
 {
 	Q_OBJECT;
-	Q_INTERFACES(IPlugin IRosterDataHolder IPEPHandler);
+    Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IPEPHandler);
 
 public:
 	UserMood();
@@ -88,7 +66,9 @@ public:
 
 	//IPEPHandler
 	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
-	void isSetMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
+
+    //IUserMood
+    virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
 
 signals:
 	//IRosterDataHolder
