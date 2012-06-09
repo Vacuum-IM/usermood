@@ -2,8 +2,8 @@
 
 #include <QDebug>
 
-#define ADR_STREAM_JID                  Action::DR_StreamJid
-#define RDR_MOOD_NAME                   452
+#define ADR_STREAM_JID	Action::DR_StreamJid
+#define RDR_MOOD_NAME	452
 
 UserMood::UserMood()
 {
@@ -31,7 +31,6 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
 	APluginInfo->version = "0.1";
 	APluginInfo->author = "Alexey Ivanov aka krab";
-	APluginInfo->homePage = "http://www.vacuum-im.org";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(MAINWINDOW_UUID);
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -335,13 +334,12 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 						{
 							AMoodText = textElem.text();
 						}
-						onShowNotification(AStreamJid, ASenderJid);
 					}
 				}
 			}
 		}
 	}
-	setContactMood(ASenderJid, AMoodName, AMoodText);
+	setContactMood(AStreamJid, ASenderJid, AMoodName, AMoodText);
 
 	return true;
 }
@@ -380,7 +378,7 @@ void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QSt
 
 void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 {
-	if (FNotifications && FNotifications->notifications().isEmpty() && FContactsMood.contains(AContactJid.pBare()))
+	if (FNotifications && /*FNotifications->notifications().isEmpty() &&*/ FContactsMood.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
 	{
 		INotification notify;
 		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
@@ -389,11 +387,9 @@ void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 			notify.typeId = NNT_USERMOOD;
 			notify.data.insert(NDR_ICON,FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).icon);
 			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
-			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(AStreamJid, AContactJid));
+			notify.data.insert(NDR_POPUP_TITLE,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
-
-			//notify.data.insert(NDR_POPUP_HTML,TODO);
-
+			notify.data.insert(NDR_POPUP_HTML,QString("[%1] %2").arg(FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).locname).arg(FContactsMood.value(AContactJid.pBare()).text).replace("\n", "<br>"));
 			FNotifies.insert(FNotifications->appendNotification(notify),AContactJid);
 		}
 	}
@@ -470,7 +466,7 @@ void UserMood::onSetMoodActionTriggered(bool)
 	}
 }
 
-void UserMood::setContactMood(const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText)
+void UserMood::setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText)
 {
 	if((FContactsMood.value(ASenderJid.pBare()).keyname != AMoodName) || FContactsMood.value(ASenderJid.pBare()).text != AMoodText)
 	{
@@ -480,6 +476,7 @@ void UserMood::setContactMood(const Jid &ASenderJid, const QString &AMoodName, c
 			data.keyname = AMoodName;
 			data.text = AMoodText;
 			FContactsMood.insert(ASenderJid.pBare(), data);
+			onShowNotification(AStreamJid, ASenderJid);
 		}
 		else
 			FContactsMood.remove(ASenderJid.pBare());

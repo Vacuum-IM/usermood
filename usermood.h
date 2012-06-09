@@ -77,7 +77,7 @@ protected slots:
 //    void onOptionsChanged(const OptionsNode &ANode);
 //    void onRosterIndexInserted(const Jid &AContactJid, const QString &AMood);
 	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips);
-	void onShowNotification(const Jid &AStreamJid, const Jid &AContectJid);
+	void onShowNotification(const Jid &AStreamJid, const Jid &AContactJid);
 	void onNotificationActivated(int ANotifyId);
 	void onNotificationRemoved(int ANotifyId);
 	void onRosterIndexInserted(IRosterIndex *AIndex);
@@ -87,7 +87,7 @@ protected slots:
 
 protected:
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
-	void setContactMood(const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
+	void setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
 
 	//IRosterDataHolder
 	void updateDataHolder(const Jid &ASenderJid = Jid::null);
