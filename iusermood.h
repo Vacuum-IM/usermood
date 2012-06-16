@@ -32,7 +32,13 @@ class IUserMood
 {
 public:
 	virtual QObject *instance() = 0;
-	virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText) = 0;
+	virtual void setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText) = 0;
+	virtual QIcon moodIcon(const QString &keyname) const = 0;
+	virtual QString moodName(const QString &keyname) const = 0;
+	virtual QString contactMoodKey(const Jid &contactJid) const = 0;
+	virtual QIcon contactMoodIcon(const Jid &contactJid) const = 0;
+	virtual QString contactMoodName(const Jid &contactJid) const = 0;
+	virtual QString contactMoodText(const Jid &contactJid) const = 0;
 //signals:
 };
 

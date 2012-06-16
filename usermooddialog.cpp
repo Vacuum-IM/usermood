@@ -1,6 +1,6 @@
 #include "usermooddialog.h"
 
-UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, QMap<QString, MoodContact> &AContactsMood, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
+UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
 {
 	ui.setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -15,19 +15,17 @@ UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodDat
 	{
 		ui.cmbMood->addItem(it->icon, it->locname, it.key());
 	}
-
 	ui.cmbMood->model()->sort(Qt::AscendingOrder);
 	ui.cmbMood->removeItem(ui.cmbMood->findData(MOOD_NULL));
-	ui.cmbMood->insertItem(0, AMoodsCatalog.value(MOOD_NULL).icon, AMoodsCatalog.value(MOOD_NULL).locname, MOOD_NULL);
+	ui.cmbMood->insertItem(0, FUserMood->moodIcon(MOOD_NULL), FUserMood->moodName(MOOD_NULL), MOOD_NULL);
 	ui.cmbMood->insertSeparator(1);
 
 	int pos;
-	pos = ui.cmbMood->findData(AContactsMood.value(AStreamJid.pBare()).keyname);
-
+	pos = ui.cmbMood->findData(FUserMood->contactMoodKey(AStreamJid));
 	if(pos != -1)
 	{
 		ui.cmbMood->setCurrentIndex(pos);
-		ui.pteText->setPlainText(AContactsMood.value(AStreamJid.pBare()).text);
+		ui.pteText->setPlainText(FUserMood->contactMoodText(AStreamJid));
 	}
 	else
 		ui.cmbMood->setCurrentIndex(0);

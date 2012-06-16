@@ -66,7 +66,13 @@ public:
 	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
 
 	//IUserMood
-	virtual void setMood(const Jid &streamJid, const QString &AMoodKey, const QString &AMoodText);
+	virtual void setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText);
+	virtual QIcon moodIcon(const QString &keyname) const;
+	virtual QString moodName(const QString &keyname) const;
+	virtual QString contactMoodKey(const Jid &contactJid) const;
+	virtual QIcon contactMoodIcon(const Jid &contactJid) const;
+	virtual QString contactMoodName(const Jid &contactJid) const;
+	virtual QString contactMoodText(const Jid &contactJid) const;
 
 signals:
 	//IRosterDataHolder

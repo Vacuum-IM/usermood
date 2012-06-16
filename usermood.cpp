@@ -287,7 +287,7 @@ QVariant UserMood::rosterData(const IRosterIndex *AIndex, int ARole) const
 {
 	if(ARole == RDR_MOOD_NAME)
 	{
-		QIcon pic = FMoodsCatalog.value(FContactsMood.value(AIndex->data(RDR_PREP_BARE_JID).toString()).keyname).icon;
+		QIcon pic = contactMoodIcon(AIndex->data(RDR_PREP_BARE_JID).toString());
 		return pic;
 	}
 	return QVariant();
@@ -344,7 +344,7 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 	return true;
 }
 
-void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QString &AMoodText)
+void UserMood::setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText)
 {
 	QDomDocument doc("");
 	QDomElement root = doc.createElement("item");
@@ -352,7 +352,6 @@ void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QSt
 
 	QDomElement mood = doc.createElementNS(MOOD_PROTOCOL_URL, "mood");
 	root.appendChild(mood);
-
 	if(AMoodKey != MOOD_NULL)
 	{
 		QDomElement name = doc.createElement(AMoodKey);
@@ -363,7 +362,6 @@ void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QSt
 		QDomElement name = doc.createElement("");
 		mood.appendChild(name);
 	}
-
 	if(AMoodKey != MOOD_NULL)
 	{
 		QDomElement text = doc.createElement("text");
@@ -372,8 +370,7 @@ void UserMood::setMood(const Jid &AstreamJid, const QString &AMoodKey, const QSt
 		QDomText t1 = doc.createTextNode(AMoodText);
 		text.appendChild(t1);
 	}
-
-	FPEPManager->publishItem(AstreamJid, MOOD_PROTOCOL_URL, root);
+	FPEPManager->publishItem(AStreamJid, MOOD_PROTOCOL_URL, root);
 }
 
 void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
@@ -385,11 +382,11 @@ void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 		if ((notify.kinds & INotification::PopupWindow) > 0)
 		{
 			notify.typeId = NNT_USERMOOD;
-			notify.data.insert(NDR_ICON,FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).icon);
+			notify.data.insert(NDR_ICON,contactMoodIcon(AContactJid));
 			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
 			notify.data.insert(NDR_POPUP_TITLE,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
-			notify.data.insert(NDR_POPUP_HTML,QString("[%1] %2").arg(FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).locname).arg(FContactsMood.value(AContactJid.pBare()).text).replace("\n", "<br>"));
+			notify.data.insert(NDR_POPUP_HTML,QString("[%1] %2").arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
 			FNotifies.insert(FNotifications->appendNotification(notify),AContactJid);
 		}
 	}
@@ -442,8 +439,8 @@ Action *UserMood::createSetMoodAction(const Jid &AStreamJid, const QString &AFea
 		Action *action = new Action(AParent);
 		action->setText(tr("Mood"));
 		QIcon menuicon;
-		if(!FMoodsCatalog.value(FContactsMood.value(AStreamJid.pBare()).keyname).icon.isNull())
-			menuicon = FMoodsCatalog.value(FContactsMood.value(AStreamJid.pBare()).keyname).icon;
+		if(!contactMoodIcon(AStreamJid).isNull())
+			menuicon = contactMoodIcon(AStreamJid);
 		else
 			menuicon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 		action->setIcon(menuicon);
@@ -461,14 +458,14 @@ void UserMood::onSetMoodActionTriggered(bool)
 	{
 		Jid AStreamJid = action->data(ADR_STREAM_JID).toString();
 		UserMoodDialog *dialog;
-		dialog = new UserMoodDialog(this, FMoodsCatalog, FContactsMood, AStreamJid);
+		dialog = new UserMoodDialog(this, FMoodsCatalog, AStreamJid);
 		WidgetManager::showActivateRaiseWindow(dialog);
 	}
 }
 
 void UserMood::setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText)
 {
-	if((FContactsMood.value(ASenderJid.pBare()).keyname != AMoodName) || FContactsMood.value(ASenderJid.pBare()).text != AMoodText)
+	if((contactMoodKey(ASenderJid) != AMoodName) || contactMoodText(ASenderJid) != AMoodText)
 	{
 		if(!AMoodName.isEmpty())
 		{
@@ -514,13 +511,42 @@ void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiM
 	if(ALabelId == RLID_DISPLAY || ALabelId == FUserMoodLabelId)
 	{
 		Jid AContactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
-		if(!FContactsMood.value(AContactJid.pBare()).keyname.isEmpty())
+		if(!contactMoodKey(AContactJid).isEmpty())
 		{
-			QString text = FContactsMood.value(AContactJid.pBare()).text;
-			QString tip = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(FMoodsCatalog.value(FContactsMood.value(AContactJid.pBare()).keyname).locname).arg(text.replace("\n", "<br>"));
-			AToolTips.insert(RTTO_USERMOOD, tip);
+			AToolTips.insert(RTTO_USERMOOD, QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
 		}
 	}
+}
+
+QIcon UserMood::moodIcon(const QString &keyname) const
+{
+	return FMoodsCatalog.value(keyname).icon;
+}
+
+QString UserMood::moodName(const QString &keyname) const
+{
+	return FMoodsCatalog.value(keyname).locname;
+}
+
+QString UserMood::contactMoodKey(const Jid &contactJid) const
+{
+	return FContactsMood.value(contactJid.pBare()).keyname;
+}
+
+QIcon UserMood::contactMoodIcon(const Jid &contactJid) const
+{
+	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).icon;
+}
+
+QString UserMood::contactMoodName(const Jid &contactJid) const
+{
+	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).locname;
+}
+
+QString UserMood::contactMoodText(const Jid &contactJid) const
+{
+	QString text = FContactsMood.value(contactJid.pBare()).text;
+	return text.replace("\n", "<br>");
 }
 
 void UserMood::onApplicationQuit()
