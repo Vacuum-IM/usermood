@@ -2,6 +2,7 @@ TRANS_LANGS  = ru pl de uk
 
 FIRST_TARGET = $$member(TARGET,0)
 TRANSLATIONS = \
+	translations/en/$${FIRST_TARGET}.ts \
 	translations/ru/$${FIRST_TARGET}.ts \
 	translations/pl/$${FIRST_TARGET}.ts \
 	translations/de/$${FIRST_TARGET}.ts \
