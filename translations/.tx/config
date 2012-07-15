@@ -1,0 +1,6 @@
+[main]
+host = http://www.transifex.net
+
+[vacuum-im.usermoodts]
+file_filter = <lang>/usermood.ts
+source_lang = ru
