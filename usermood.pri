@@ -1,9 +1,9 @@
 HEADERS = usermood.h \
-	usermooddialog.h \
-	iusermood.h
+          usermooddialog.h \
+          iusermood.h
 
 SOURCES = usermood.cpp \
-	usermooddialog.cpp
+          usermooddialog.cpp
 
 FORMS += \
-	usermooddialog.ui
+          usermooddialog.ui

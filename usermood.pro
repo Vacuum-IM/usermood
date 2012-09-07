@@ -1,20 +1,14 @@
-#Plugin file name
+include(qmake/debug.inc)
+include(qmake/config.inc)
+
+#Project configuration
 TARGET              = usermood
-include(config.inc)
-
-#Project Configuration
-TEMPLATE            = lib
-CONFIG             += plugin
 QT                  = core gui xml
-LIBS               += -l$${TARGET_UTILS}
-LIBS               += -L$${VACUUM_LIB_PATH}
-DEPENDPATH         += $${VACUUM_SRC_PATH}
-INCLUDEPATH        += $${VACUUM_SRC_PATH}
+include(usermood.pri)
 
-#Install
-include(install.inc)
+#Default progect configuration
+include(qmake/plugin.inc)
 
 #Translation
-include(translations.inc)
-
-include(usermood.pri)
+TRANS_SOURCE_ROOT   = .
+include(translations/languages.inc)
