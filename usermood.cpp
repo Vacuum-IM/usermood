@@ -373,7 +373,7 @@ void UserMood::setMood(const Jid &AStreamJid, const QString &AMoodKey, const QSt
 
 void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 {
-	if (FNotifications && /*FNotifications->notifications().isEmpty() &&*/ FContactsMood.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
+	if (FNotifications && FContactsMood.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
 	{
 		INotification notify;
 		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
@@ -408,18 +408,6 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 	}
 }
 
-bool UserMood::isSupported(const Jid &AStreamJid) const
-{
-	bool supported = false;
-	IDiscoInfo dinfo = FDiscovery!=NULL ? FDiscovery->discoInfo(AStreamJid, AStreamJid.domain()) : IDiscoInfo();
-	for (int i=0; !supported && i<dinfo.identity.count(); i++)
-	{
-		const IDiscoIdentity &ident = dinfo.identity.at(i);
-		supported = ident.category==DIC_PUBSUB && ident.type==DIT_PEP;
-	}
-	return supported;
-}
-
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
 {
 	if(ALabelId == RLID_DISPLAY && AIndexes.count() == 1)
@@ -432,7 +420,7 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, i
 			if(presence && presence->isOpen())
 			{
 				int show = index->data(RDR_SHOW).toInt();
-				if(show != IPresence::Offline && show != IPresence::Error && isSupported(AStreamJid))
+				if(show != IPresence::Offline && show != IPresence::Error && FPEPManager->isSupported(AStreamJid))
 				{
 					Action *action = createSetMoodAction(AStreamJid, MOOD_PROTOCOL_URL, AMenu);
 					AMenu->addAction(action, AG_RVCM_USERMOOD, false);
