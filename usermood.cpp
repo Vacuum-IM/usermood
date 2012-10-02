@@ -381,6 +381,8 @@ void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 		{
 			notify.typeId = NNT_USERMOOD;
 			notify.data.insert(NDR_ICON,contactMoodIcon(AContactJid));
+			notify.data.insert(NDR_STREAM_JID,AStreamJid.full());
+			notify.data.insert(NDR_CONTACT_JID,AContactJid.full());
 			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
 			notify.data.insert(NDR_POPUP_TITLE,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
