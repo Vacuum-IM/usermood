@@ -94,6 +94,7 @@ protected slots:
 protected:
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
 	void setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
+	bool isSupported(const Jid &AStreamJid) const;
 
 	//IRosterDataHolder
 	void updateDataHolder(const Jid &ASenderJid = Jid::null);
@@ -102,11 +103,10 @@ private:
 	IMainWindowPlugin *FMainWindowPlugin;
 	IPresencePlugin *FPresencePlugin;
 	IPEPManager *FPEPManager;
-	IServiceDiscovery *FServiceDiscovery;
+	IServiceDiscovery *FDiscovery;
 	IXmppStreams *FXmppStreams;
 	IOptionsManager *FOptionsManager;
 	IRostersModel *FRostersModel;
-	IServiceDiscovery *FDiscovery;
 	IRostersViewPlugin *FRostersViewPlugin;
 	INotifications *FNotifications;
 

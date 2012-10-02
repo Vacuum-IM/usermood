@@ -44,6 +44,11 @@ CHANGELOG
 =========
   LEGEND: [+]-New feature [*]-Enhancement [-]-Bug fix
 
+  v0.2
+  ------
+  [-] Correct pupsub detection.
+  [-] Fixed tooltips. No new empty line.
+
   v0.1
   ------
   [!] Initial version

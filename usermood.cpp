@@ -5,14 +5,16 @@
 #define ADR_STREAM_JID	Action::DR_StreamJid
 #define RDR_MOOD_NAME	452
 
+#define DIC_PUBSUB		"pubsub"
+#define DIT_PEP			"pep"
+
 UserMood::UserMood()
 {
 	FMainWindowPlugin = NULL;
 	FPEPManager = NULL;
-	FServiceDiscovery = NULL;
+	FDiscovery = NULL;
 	FXmppStreams = NULL;
 	FOptionsManager = NULL;
-	FDiscovery = NULL;
 	FRostersModel = NULL;
 	FRostersViewPlugin = NULL;
 
@@ -29,17 +31,13 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.1";
+	APluginInfo->version = "0.2";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
-	APluginInfo->dependences.append(MAINWINDOW_UUID);
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
 	APluginInfo->dependences.append(SERVICEDISCOVERY_UUID);
 	APluginInfo->dependences.append(XMPPSTREAMS_UUID);
 	APluginInfo->dependences.append(PRESENCE_UUID);
-	APluginInfo->dependences.append(ROSTERSMODEL_UUID);
-	APluginInfo->dependences.append(ROSTERSVIEW_UUID);
-	APluginInfo->dependences.append(NOTIFICATIONS_UUID);
 }
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
@@ -61,7 +59,7 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 	plugin = APluginManager->pluginInterface("IServiceDiscovery").value(0, NULL);
 	if(plugin)
 	{
-		FServiceDiscovery = qobject_cast<IServiceDiscovery *>(plugin->instance());
+		FDiscovery = qobject_cast<IServiceDiscovery *>(plugin->instance());
 	}
 
 	plugin = APluginManager->pluginInterface("IXmppStreams").value(0, NULL);
@@ -134,13 +132,13 @@ bool UserMood::initObjects()
 	feature.description = tr("Supports the exchange of information about user moods");
 	feature.var = MOOD_PROTOCOL_URL;
 
-	FServiceDiscovery->insertDiscoFeature(feature);
+	FDiscovery->insertDiscoFeature(feature);
 
 	feature.name = tr("User mood notification");
-	feature.var = MOOD_NOTIFY_PROTOCOL_URL;
 	feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 	feature.description = tr("Supports the exchange of information about user moods");
-	FServiceDiscovery->insertDiscoFeature(feature);
+	feature.var = MOOD_NOTIFY_PROTOCOL_URL;
+	FDiscovery->insertDiscoFeature(feature);
 
 	if (FNotifications)
 	{
@@ -408,6 +406,18 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 	}
 }
 
+bool UserMood::isSupported(const Jid &AStreamJid) const
+{
+	bool supported = false;
+	IDiscoInfo dinfo = FDiscovery!=NULL ? FDiscovery->discoInfo(AStreamJid, AStreamJid.domain()) : IDiscoInfo();
+	for (int i=0; !supported && i<dinfo.identity.count(); i++)
+	{
+		const IDiscoIdentity &ident = dinfo.identity.at(i);
+		supported = ident.category==DIC_PUBSUB && ident.type==DIT_PEP;
+	}
+	return supported;
+}
+
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
 {
 	if(ALabelId == RLID_DISPLAY && AIndexes.count() == 1)
@@ -419,10 +429,8 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, i
 			IPresence *presence = FPresencePlugin != NULL ? FPresencePlugin->findPresence(AStreamJid) : NULL;
 			if(presence && presence->isOpen())
 			{
-				Jid AContactJid = index->data(RDR_FULL_JID).toString();
 				int show = index->data(RDR_SHOW).toInt();
-				QStringList features = FDiscovery != NULL ? FDiscovery->discoInfo(AStreamJid, AContactJid).features : QStringList();
-				if(show != IPresence::Offline && show != IPresence::Error && !features.contains(MOOD_PROTOCOL_URL))
+				if(show != IPresence::Offline && show != IPresence::Error && isSupported(AStreamJid))
 				{
 					Action *action = createSetMoodAction(AStreamJid, MOOD_PROTOCOL_URL, AMenu);
 					AMenu->addAction(action, AG_RVCM_USERMOOD, false);
@@ -513,7 +521,11 @@ void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiM
 		Jid AContactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
 		if(!contactMoodKey(AContactJid).isEmpty())
 		{
-			AToolTips.insert(RTTO_USERMOOD, QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
+			QString tooltip_full = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid));
+			QString tooltip_short = QString("%1 <div style='margin-left:10px;'>%2</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(AContactJid));
+			AToolTips.insert(RTTO_USERMOOD, contactMoodText(AContactJid).isEmpty() ? tooltip_short : tooltip_full);
 		}
 	}
 }
