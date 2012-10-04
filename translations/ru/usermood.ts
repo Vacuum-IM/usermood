@@ -45,7 +45,7 @@
     </message>
     <message>
         <source>Annoyed</source>
-        <translation>Недовольное</translation>
+        <translation>Раздражённое</translation>
     </message>
     <message>
         <source>Anxious</source>
@@ -357,22 +357,22 @@
     </message>
     <message>
         <source>When receiving mood</source>
-        <translation type="unfinished"></translation>
+        <translation>При получении уведомления о настроении</translation>
     </message>
     <message>
         <source>User Mood Notification</source>
-        <translation type="unfinished"></translation>
+        <translation>Уведомление настроения</translation>
     </message>
     <message>
         <source>changed mood</source>
-        <translation type="unfinished"></translation>
+        <translation>сменил настроение</translation>
     </message>
 </context>
 <context>
     <name>UserMoodDialog</name>
     <message>
         <source>Set mood</source>
-        <translation type="unfinished">Установить настроение</translation>
+        <translation>Установить настроение</translation>
     </message>
 </context>
 </TS>
