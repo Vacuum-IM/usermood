@@ -141,7 +141,6 @@ bool UserMood::initObjects()
 	feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 	feature.description = tr("Supports the exchange of information about user moods");
 	feature.var = MOOD_PROTOCOL_URL;
-
 	FDiscovery->insertDiscoFeature(feature);
 
 	feature.name = tr("User mood notification");
@@ -157,7 +156,7 @@ bool UserMood::initObjects()
 		notifyType.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 		notifyType.title = tr("When receiving mood");
 		notifyType.kindMask = INotification::PopupWindow;
-		notifyType.kindDefs = notifyType.kindMask;
+		//notifyType.kindDefs;
 		FNotifications->registerNotificationType(NNT_USERMOOD,notifyType);
 	}
 
