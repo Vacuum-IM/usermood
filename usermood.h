@@ -92,6 +92,8 @@ protected slots:
 	void onApplicationQuit();
 
 protected:
+	void addMood(const QString &name, const QString &locname);
+	void addMood(const QString &name, const QString &icon, const QString &locname);
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
 	void setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
 

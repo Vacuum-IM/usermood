@@ -22,6 +22,16 @@ UserMood::UserMood()
 
 }
 
+void UserMood::addMood(const QString &name, const QString &locname)
+{
+	FMoodsCatalog.insert(name, MoodData(locname));
+}
+
+void UserMood::addMood(const QString &name, const QString &icon, const QString &locname)
+{
+	FMoodsCatalog.insert(name, MoodData(icon, locname));
+}
+
 UserMood::~UserMood()
 {
 
@@ -178,87 +188,88 @@ bool UserMood::initObjects()
 		FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, index);
 	}
 
-	FMoodsCatalog.insert(MOOD_NULL, MoodData(tr("Without mood")));
-	FMoodsCatalog.insert(MOOD_AFRAID, MoodData(UMI_AFRAID, tr("Afraid")));
-	FMoodsCatalog.insert(MOOD_AMAZED, MoodData(UMI_AMAZED, tr("Amazed")));
-	FMoodsCatalog.insert(MOOD_ANGRY, MoodData(UMI_ANGRY, tr("Angry")));
-	FMoodsCatalog.insert(MOOD_AMOROUS, MoodData(UMI_AMOROUS, tr("Amorous")));
-	FMoodsCatalog.insert(MOOD_ANNOYED, MoodData(UMI_ANNOYED, tr("Annoyed")));
-	FMoodsCatalog.insert(MOOD_ANXIOUS, MoodData(UMI_ANXIOUS, tr("Anxious")));
-	FMoodsCatalog.insert(MOOD_AROUSED, MoodData(UMI_AROUSED, tr("Aroused")));
-	FMoodsCatalog.insert(MOOD_ASHAMED, MoodData(UMI_ASHAMED, tr("Ashamed")));
-	FMoodsCatalog.insert(MOOD_BORED, MoodData(UMI_BORED, tr("Bored")));
-	FMoodsCatalog.insert(MOOD_BRAVE, MoodData(UMI_BRAVE, tr("Brave")));
-	FMoodsCatalog.insert(MOOD_CALM, MoodData(UMI_CALM, tr("Calm")));
-	FMoodsCatalog.insert(MOOD_CAUTIOUS, MoodData(UMI_CAUTIOUS, tr("Cautious")));
-	FMoodsCatalog.insert(MOOD_COLD, MoodData(UMI_COLD, tr("Cold")));
-	FMoodsCatalog.insert(MOOD_CONFIDENT, MoodData(UMI_CONFIDENT, tr("Confident")));
-	FMoodsCatalog.insert(MOOD_CONFUSED, MoodData(UMI_CONFUSED, tr("Confused")));
-	FMoodsCatalog.insert(MOOD_CONTEMPLATIVE, MoodData(UMI_CONTEMPLATIVE, tr("Contemplative")));
-	FMoodsCatalog.insert(MOOD_CONTENTED, MoodData(UMI_CONTENTED, tr("Contented")));
-	FMoodsCatalog.insert(MOOD_CRANKY, MoodData(UMI_CRANKY, tr("Cranky")));
-	FMoodsCatalog.insert(MOOD_CRAZY, MoodData(UMI_CRAZY, tr("Crazy")));
-	FMoodsCatalog.insert(MOOD_CREATIVE, MoodData(UMI_CREATIVE, tr("Creative")));
-	FMoodsCatalog.insert(MOOD_CURIOUS, MoodData(UMI_CURIOUS, tr("Curious")));
-	FMoodsCatalog.insert(MOOD_DEJECTED, MoodData(UMI_DEJECTED, tr("Dejected")));
-	FMoodsCatalog.insert(MOOD_DEPRESSED, MoodData(UMI_DEPRESSED, tr("Depressed")));
-	FMoodsCatalog.insert(MOOD_DISAPPOINTED, MoodData(UMI_DISAPPOINTED, tr("Disappointed")));
-	FMoodsCatalog.insert(MOOD_DISGUSTED, MoodData(UMI_DISGUSTED, tr("Disgusted")));
-	FMoodsCatalog.insert(MOOD_DISMAYED, MoodData(UMI_DISMAYED, tr("Dismayed")));
-	FMoodsCatalog.insert(MOOD_DISTRACTED, MoodData(UMI_DISTRACTED, tr("Distracted")));
-	FMoodsCatalog.insert(MOOD_EMBARRASSED, MoodData(UMI_EMBARRASSED, tr("Embarrassed")));
-	FMoodsCatalog.insert(MOOD_ENVIOUS, MoodData(UMI_ENVIOUS, tr("Envious")));
-	FMoodsCatalog.insert(MOOD_EXCITED, MoodData(UMI_EXCITED, tr("Excited")));
-	FMoodsCatalog.insert(MOOD_FLIRTATIOUS, MoodData(UMI_FLIRTATIOUS, tr("Flirtatious")));
-	FMoodsCatalog.insert(MOOD_FRUSTRATED, MoodData(UMI_FRUSTRATED, tr("Frustrated")));
-	FMoodsCatalog.insert(MOOD_GRUMPY, MoodData(UMI_GRUMPY, tr("Grumpy")));
-	FMoodsCatalog.insert(MOOD_GUILTY, MoodData(UMI_GUILTY, tr("Guilty")));
-	FMoodsCatalog.insert(MOOD_HAPPY, MoodData(UMI_HAPPY, tr("Happy")));
-	FMoodsCatalog.insert(MOOD_HOPEFUL, MoodData(UMI_HOPEFUL, tr("Hopeful")));
-	FMoodsCatalog.insert(MOOD_HOT, MoodData(UMI_HOT, tr("Hot")));
-	FMoodsCatalog.insert(MOOD_HUMBLED, MoodData(UMI_HUMBLED, tr("Humbled")));
-	FMoodsCatalog.insert(MOOD_HUMILIATED, MoodData(UMI_HUMILIATED, tr("Humiliated")));
-	FMoodsCatalog.insert(MOOD_HUNGRY, MoodData(UMI_HUNGRY, tr("Hungry")));
-	FMoodsCatalog.insert(MOOD_HURT, MoodData(UMI_HURT, tr("Hurt")));
-	FMoodsCatalog.insert(MOOD_IMPRESSED, MoodData(UMI_IMPRESSED, tr("Impressed")));
-	FMoodsCatalog.insert(MOOD_IN_AWE, MoodData(UMI_IN_AWE, tr("In awe")));
-	FMoodsCatalog.insert(MOOD_IN_LOVE, MoodData(UMI_IN_LOVE, tr("In love")));
-	FMoodsCatalog.insert(MOOD_INDIGNANT, MoodData(UMI_INDIGNANT, tr("Indignant")));
-	FMoodsCatalog.insert(MOOD_INTERESTED, MoodData(UMI_INTERESTED, tr("Interested")));
-	FMoodsCatalog.insert(MOOD_INTOXICATED, MoodData(UMI_INTOXICATED, tr("Intoxicated")));
-	FMoodsCatalog.insert(MOOD_INVINCIBLE, MoodData(UMI_INVINCIBLE, tr("Invincible")));
-	FMoodsCatalog.insert(MOOD_JEALOUS, MoodData(UMI_JEALOUS, tr("Jealous")));
-	FMoodsCatalog.insert(MOOD_LONELY, MoodData(UMI_LONELY, tr("Lonely")));
-	FMoodsCatalog.insert(MOOD_LUCKY, MoodData(UMI_LUCKY, tr("Lucky")));
-	FMoodsCatalog.insert(MOOD_MEAN, MoodData(UMI_MEAN, tr("Mean")));
-	FMoodsCatalog.insert(MOOD_MOODY, MoodData(UMI_MOODY, tr("Moody")));
-	FMoodsCatalog.insert(MOOD_NERVOUS, MoodData(UMI_NERVOUS, tr("Nervous")));
-	FMoodsCatalog.insert(MOOD_NEUTRAL, MoodData(UMI_NEUTRAL, tr("Neutral")));
-	FMoodsCatalog.insert(MOOD_OFFENDED, MoodData(UMI_OFFENDED, tr("Offended")));
-	FMoodsCatalog.insert(MOOD_OUTRAGED, MoodData(UMI_OUTRAGED, tr("Outraged")));
-	FMoodsCatalog.insert(MOOD_PLAYFUL, MoodData(UMI_PLAYFUL, tr("Playful")));
-	FMoodsCatalog.insert(MOOD_PROUD, MoodData(UMI_PROUD, tr("Proud")));
-	FMoodsCatalog.insert(MOOD_RELAXED, MoodData(UMI_RELAXED, tr("Relaxed")));
-	FMoodsCatalog.insert(MOOD_RELIEVED, MoodData(UMI_RELIEVED, tr("Relieved")));
-	FMoodsCatalog.insert(MOOD_REMORSEFUL, MoodData(UMI_REMORSEFUL, tr("Remorseful")));
-	FMoodsCatalog.insert(MOOD_RESTLESS, MoodData(UMI_RESTLESS, tr("Restless")));
-	FMoodsCatalog.insert(MOOD_SAD, MoodData(UMI_SAD, tr("Sad")));
-	FMoodsCatalog.insert(MOOD_SARCASTIC, MoodData(UMI_SARCASTIC, tr("Sarcastic")));
-	FMoodsCatalog.insert(MOOD_SERIOUS, MoodData(UMI_SERIOUS, tr("Serious")));
-	FMoodsCatalog.insert(MOOD_SHOCKED, MoodData(UMI_SHOCKED, tr("Shocked")));
-	FMoodsCatalog.insert(MOOD_SHY, MoodData(UMI_SHY, tr("Shy")));
-	FMoodsCatalog.insert(MOOD_SICK, MoodData(UMI_SICK, tr("Sick")));
-	FMoodsCatalog.insert(MOOD_SLEEPY, MoodData(UMI_SLEEPY, tr("Sleepy")));
-	FMoodsCatalog.insert(MOOD_SPONTANEOUS, MoodData(UMI_SPONTANEOUS, tr("Spontaneous")));
-	FMoodsCatalog.insert(MOOD_STRESSED, MoodData(UMI_STRESSED, tr("Stressed")));
-	FMoodsCatalog.insert(MOOD_STRONG, MoodData(UMI_STRONG, tr("Strong")));
-	FMoodsCatalog.insert(MOOD_SURPRISED, MoodData(UMI_SURPRISED, tr("Surprised")));
-	FMoodsCatalog.insert(MOOD_THANKFUL, MoodData(UMI_THANKFUL, tr("Thankful")));
-	FMoodsCatalog.insert(MOOD_THIRSTY, MoodData(UMI_THIRSTY, tr("Thirsty")));
-	FMoodsCatalog.insert(MOOD_TIRED, MoodData(UMI_TIRED, tr("Tired")));
-	FMoodsCatalog.insert(MOOD_UNDEFINED, MoodData(UMI_UNDEFINED, tr("Undefined")));
-	FMoodsCatalog.insert(MOOD_WEAK, MoodData(UMI_WEAK, tr("Weak"))); 
-	FMoodsCatalog.insert(MOOD_WORRIED, MoodData(UMI_WORRIED, tr("Worried")));
+	addMood(MOOD_NULL, tr("Without mood"));
+
+	addMood(MOOD_AFRAID, UMI_AFRAID, tr("Afraid"));
+	addMood(MOOD_AMAZED, UMI_AMAZED, tr("Amazed"));
+	addMood(MOOD_ANGRY, UMI_ANGRY, tr("Angry"));
+	addMood(MOOD_AMOROUS, UMI_AMOROUS, tr("Amorous"));
+	addMood(MOOD_ANNOYED, UMI_ANNOYED, tr("Annoyed"));
+	addMood(MOOD_ANXIOUS, UMI_ANXIOUS, tr("Anxious"));
+	addMood(MOOD_AROUSED, UMI_AROUSED, tr("Aroused"));
+	addMood(MOOD_ASHAMED, UMI_ASHAMED, tr("Ashamed"));
+	addMood(MOOD_BORED, UMI_BORED, tr("Bored"));
+	addMood(MOOD_BRAVE, UMI_BRAVE, tr("Brave"));
+	addMood(MOOD_CALM, UMI_CALM, tr("Calm"));
+	addMood(MOOD_CAUTIOUS, UMI_CAUTIOUS, tr("Cautious"));
+	addMood(MOOD_COLD, UMI_COLD, tr("Cold"));
+	addMood(MOOD_CONFIDENT, UMI_CONFIDENT, tr("Confident"));
+	addMood(MOOD_CONFUSED, UMI_CONFUSED, tr("Confused"));
+	addMood(MOOD_CONTEMPLATIVE, UMI_CONTEMPLATIVE, tr("Contemplative"));
+	addMood(MOOD_CONTENTED, UMI_CONTENTED, tr("Contented"));
+	addMood(MOOD_CRANKY, UMI_CRANKY, tr("Cranky"));
+	addMood(MOOD_CRAZY, UMI_CRAZY, tr("Crazy"));
+	addMood(MOOD_CREATIVE, UMI_CREATIVE, tr("Creative"));
+	addMood(MOOD_CURIOUS, UMI_CURIOUS, tr("Curious"));
+	addMood(MOOD_DEJECTED, UMI_DEJECTED, tr("Dejected"));
+	addMood(MOOD_DEPRESSED, UMI_DEPRESSED, tr("Depressed"));
+	addMood(MOOD_DISAPPOINTED, UMI_DISAPPOINTED, tr("Disappointed"));
+	addMood(MOOD_DISGUSTED, UMI_DISGUSTED, tr("Disgusted"));
+	addMood(MOOD_DISMAYED, UMI_DISMAYED, tr("Dismayed"));
+	addMood(MOOD_DISTRACTED, UMI_DISTRACTED, tr("Distracted"));
+	addMood(MOOD_EMBARRASSED, UMI_EMBARRASSED, tr("Embarrassed"));
+	addMood(MOOD_ENVIOUS, UMI_ENVIOUS, tr("Envious"));
+	addMood(MOOD_EXCITED, UMI_EXCITED, tr("Excited"));
+	addMood(MOOD_FLIRTATIOUS, UMI_FLIRTATIOUS, tr("Flirtatious"));
+	addMood(MOOD_FRUSTRATED, UMI_FRUSTRATED, tr("Frustrated"));
+	addMood(MOOD_GRUMPY, UMI_GRUMPY, tr("Grumpy"));
+	addMood(MOOD_GUILTY, UMI_GUILTY, tr("Guilty"));
+	addMood(MOOD_HAPPY, UMI_HAPPY, tr("Happy"));
+	addMood(MOOD_HOPEFUL, UMI_HOPEFUL, tr("Hopeful"));
+	addMood(MOOD_HOT, UMI_HOT, tr("Hot"));
+	addMood(MOOD_HUMBLED, UMI_HUMBLED, tr("Humbled"));
+	addMood(MOOD_HUMILIATED, UMI_HUMILIATED, tr("Humiliated"));
+	addMood(MOOD_HUNGRY, UMI_HUNGRY, tr("Hungry"));
+	addMood(MOOD_HURT, UMI_HURT, tr("Hurt"));
+	addMood(MOOD_IMPRESSED, UMI_IMPRESSED, tr("Impressed"));
+	addMood(MOOD_IN_AWE, UMI_IN_AWE, tr("In awe"));
+	addMood(MOOD_IN_LOVE, UMI_IN_LOVE, tr("In love"));
+	addMood(MOOD_INDIGNANT, UMI_INDIGNANT, tr("Indignant"));
+	addMood(MOOD_INTERESTED, UMI_INTERESTED, tr("Interested"));
+	addMood(MOOD_INTOXICATED, UMI_INTOXICATED, tr("Intoxicated"));
+	addMood(MOOD_INVINCIBLE, UMI_INVINCIBLE, tr("Invincible"));
+	addMood(MOOD_JEALOUS, UMI_JEALOUS, tr("Jealous"));
+	addMood(MOOD_LONELY, UMI_LONELY, tr("Lonely"));
+	addMood(MOOD_LUCKY, UMI_LUCKY, tr("Lucky"));
+	addMood(MOOD_MEAN, UMI_MEAN, tr("Mean"));
+	addMood(MOOD_MOODY, UMI_MOODY, tr("Moody"));
+	addMood(MOOD_NERVOUS, UMI_NERVOUS, tr("Nervous"));
+	addMood(MOOD_NEUTRAL, UMI_NEUTRAL, tr("Neutral"));
+	addMood(MOOD_OFFENDED, UMI_OFFENDED, tr("Offended"));
+	addMood(MOOD_OUTRAGED, UMI_OUTRAGED, tr("Outraged"));
+	addMood(MOOD_PLAYFUL, UMI_PLAYFUL, tr("Playful"));
+	addMood(MOOD_PROUD, UMI_PROUD, tr("Proud"));
+	addMood(MOOD_RELAXED, UMI_RELAXED, tr("Relaxed"));
+	addMood(MOOD_RELIEVED, UMI_RELIEVED, tr("Relieved"));
+	addMood(MOOD_REMORSEFUL, UMI_REMORSEFUL, tr("Remorseful"));
+	addMood(MOOD_RESTLESS, UMI_RESTLESS, tr("Restless"));
+	addMood(MOOD_SAD, UMI_SAD, tr("Sad"));
+	addMood(MOOD_SARCASTIC, UMI_SARCASTIC, tr("Sarcastic"));
+	addMood(MOOD_SERIOUS, UMI_SERIOUS, tr("Serious"));
+	addMood(MOOD_SHOCKED, UMI_SHOCKED, tr("Shocked"));
+	addMood(MOOD_SHY, UMI_SHY, tr("Shy"));
+	addMood(MOOD_SICK, UMI_SICK, tr("Sick"));
+	addMood(MOOD_SLEEPY, UMI_SLEEPY, tr("Sleepy"));
+	addMood(MOOD_SPONTANEOUS, UMI_SPONTANEOUS, tr("Spontaneous"));
+	addMood(MOOD_STRESSED, UMI_STRESSED, tr("Stressed"));
+	addMood(MOOD_STRONG, UMI_STRONG, tr("Strong"));
+	addMood(MOOD_SURPRISED, UMI_SURPRISED, tr("Surprised"));
+	addMood(MOOD_THANKFUL, UMI_THANKFUL, tr("Thankful"));
+	addMood(MOOD_THIRSTY, UMI_THIRSTY, tr("Thirsty"));
+	addMood(MOOD_TIRED, UMI_TIRED, tr("Tired"));
+	addMood(MOOD_UNDEFINED, UMI_UNDEFINED, tr("Undefined"));
+	addMood(MOOD_WEAK, UMI_WEAK, tr("Weak"));
+	addMood(MOOD_WORRIED, UMI_WORRIED, tr("Worried"));
 
 	return true;
 }
