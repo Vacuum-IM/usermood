@@ -66,7 +66,7 @@ public:
 	virtual bool processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza);
 
 	//IUserMood
-	virtual void setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText);
+	virtual void setMood(const Jid &AStreamJid, const Mood &AMood);
 	virtual QIcon moodIcon(const QString &keyname) const;
 	virtual QString moodName(const QString &keyname) const;
 	virtual QString contactMoodKey(const Jid &contactJid) const;
@@ -93,9 +93,8 @@ protected slots:
 
 protected:
 	void addMood(const QString &name, const QString &locname);
-	void addMood(const QString &name, const QString &icon, const QString &locname);
 	Action *createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const;
-	void setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText);
+	void setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const Mood &AMood);
 
 	//IRosterDataHolder
 	void updateDataHolder(const Jid &ASenderJid = Jid::null);
@@ -115,8 +114,8 @@ private:
 	int FUserMoodLabelId;
 
 	QMap<int, Jid> FNotifies;
-	QMap<QString, MoodData> FMoodsCatalog;
-	QMap<QString, MoodContact> FContactsMood;
+	QHash<QString, MoodData> FMoodsCatalog;
+	QHash<Jid, MoodContact> FMoodsContacts;
 
 };
 

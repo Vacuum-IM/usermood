@@ -44,6 +44,11 @@ CHANGELOG
 =========
   LEGEND: [+]-New feature [*]-Enhancement [-]-Bug fix
 
+  v0.3
+  ------
+  [-] Small updated stanza read\write.
+  [-] Improved performance.
+
   v0.2
   ------
   [-] Correct pupsub detection.

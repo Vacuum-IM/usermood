@@ -1,12 +1,7 @@
 #include "usermood.h"
 
-#include <QDebug>
-
 #define ADR_STREAM_JID	Action::DR_StreamJid
 #define RDR_MOOD_NAME	452
-
-#define DIC_PUBSUB		"pubsub"
-#define DIT_PEP			"pep"
 
 UserMood::UserMood()
 {
@@ -17,19 +12,12 @@ UserMood::UserMood()
 	FOptionsManager = NULL;
 	FRostersModel = NULL;
 	FRostersViewPlugin = NULL;
-
-	//FUserMoodLabelId = -1;
-
 }
 
-void UserMood::addMood(const QString &name, const QString &locname)
+void UserMood::addMood(const QString &keyname, const QString &locname)
 {
-	FMoodsCatalog.insert(name, MoodData(locname));
-}
-
-void UserMood::addMood(const QString &name, const QString &icon, const QString &locname)
-{
-	FMoodsCatalog.insert(name, MoodData(icon, locname));
+	MoodData moodData = {locname, IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(keyname)};
+	FMoodsCatalog.insert(keyname, moodData);
 }
 
 UserMood::~UserMood()
@@ -41,7 +29,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.2";
+	APluginInfo->version = "0.3";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -188,87 +176,86 @@ bool UserMood::initObjects()
 	}
 
 	addMood(MOOD_NULL, tr("Without mood"));
-
-	addMood(MOOD_AFRAID, UMI_AFRAID, tr("Afraid"));
-	addMood(MOOD_AMAZED, UMI_AMAZED, tr("Amazed"));
-	addMood(MOOD_ANGRY, UMI_ANGRY, tr("Angry"));
-	addMood(MOOD_AMOROUS, UMI_AMOROUS, tr("Amorous"));
-	addMood(MOOD_ANNOYED, UMI_ANNOYED, tr("Annoyed"));
-	addMood(MOOD_ANXIOUS, UMI_ANXIOUS, tr("Anxious"));
-	addMood(MOOD_AROUSED, UMI_AROUSED, tr("Aroused"));
-	addMood(MOOD_ASHAMED, UMI_ASHAMED, tr("Ashamed"));
-	addMood(MOOD_BORED, UMI_BORED, tr("Bored"));
-	addMood(MOOD_BRAVE, UMI_BRAVE, tr("Brave"));
-	addMood(MOOD_CALM, UMI_CALM, tr("Calm"));
-	addMood(MOOD_CAUTIOUS, UMI_CAUTIOUS, tr("Cautious"));
-	addMood(MOOD_COLD, UMI_COLD, tr("Cold"));
-	addMood(MOOD_CONFIDENT, UMI_CONFIDENT, tr("Confident"));
-	addMood(MOOD_CONFUSED, UMI_CONFUSED, tr("Confused"));
-	addMood(MOOD_CONTEMPLATIVE, UMI_CONTEMPLATIVE, tr("Contemplative"));
-	addMood(MOOD_CONTENTED, UMI_CONTENTED, tr("Contented"));
-	addMood(MOOD_CRANKY, UMI_CRANKY, tr("Cranky"));
-	addMood(MOOD_CRAZY, UMI_CRAZY, tr("Crazy"));
-	addMood(MOOD_CREATIVE, UMI_CREATIVE, tr("Creative"));
-	addMood(MOOD_CURIOUS, UMI_CURIOUS, tr("Curious"));
-	addMood(MOOD_DEJECTED, UMI_DEJECTED, tr("Dejected"));
-	addMood(MOOD_DEPRESSED, UMI_DEPRESSED, tr("Depressed"));
-	addMood(MOOD_DISAPPOINTED, UMI_DISAPPOINTED, tr("Disappointed"));
-	addMood(MOOD_DISGUSTED, UMI_DISGUSTED, tr("Disgusted"));
-	addMood(MOOD_DISMAYED, UMI_DISMAYED, tr("Dismayed"));
-	addMood(MOOD_DISTRACTED, UMI_DISTRACTED, tr("Distracted"));
-	addMood(MOOD_EMBARRASSED, UMI_EMBARRASSED, tr("Embarrassed"));
-	addMood(MOOD_ENVIOUS, UMI_ENVIOUS, tr("Envious"));
-	addMood(MOOD_EXCITED, UMI_EXCITED, tr("Excited"));
-	addMood(MOOD_FLIRTATIOUS, UMI_FLIRTATIOUS, tr("Flirtatious"));
-	addMood(MOOD_FRUSTRATED, UMI_FRUSTRATED, tr("Frustrated"));
-	addMood(MOOD_GRUMPY, UMI_GRUMPY, tr("Grumpy"));
-	addMood(MOOD_GUILTY, UMI_GUILTY, tr("Guilty"));
-	addMood(MOOD_HAPPY, UMI_HAPPY, tr("Happy"));
-	addMood(MOOD_HOPEFUL, UMI_HOPEFUL, tr("Hopeful"));
-	addMood(MOOD_HOT, UMI_HOT, tr("Hot"));
-	addMood(MOOD_HUMBLED, UMI_HUMBLED, tr("Humbled"));
-	addMood(MOOD_HUMILIATED, UMI_HUMILIATED, tr("Humiliated"));
-	addMood(MOOD_HUNGRY, UMI_HUNGRY, tr("Hungry"));
-	addMood(MOOD_HURT, UMI_HURT, tr("Hurt"));
-	addMood(MOOD_IMPRESSED, UMI_IMPRESSED, tr("Impressed"));
-	addMood(MOOD_IN_AWE, UMI_IN_AWE, tr("In awe"));
-	addMood(MOOD_IN_LOVE, UMI_IN_LOVE, tr("In love"));
-	addMood(MOOD_INDIGNANT, UMI_INDIGNANT, tr("Indignant"));
-	addMood(MOOD_INTERESTED, UMI_INTERESTED, tr("Interested"));
-	addMood(MOOD_INTOXICATED, UMI_INTOXICATED, tr("Intoxicated"));
-	addMood(MOOD_INVINCIBLE, UMI_INVINCIBLE, tr("Invincible"));
-	addMood(MOOD_JEALOUS, UMI_JEALOUS, tr("Jealous"));
-	addMood(MOOD_LONELY, UMI_LONELY, tr("Lonely"));
-	addMood(MOOD_LUCKY, UMI_LUCKY, tr("Lucky"));
-	addMood(MOOD_MEAN, UMI_MEAN, tr("Mean"));
-	addMood(MOOD_MOODY, UMI_MOODY, tr("Moody"));
-	addMood(MOOD_NERVOUS, UMI_NERVOUS, tr("Nervous"));
-	addMood(MOOD_NEUTRAL, UMI_NEUTRAL, tr("Neutral"));
-	addMood(MOOD_OFFENDED, UMI_OFFENDED, tr("Offended"));
-	addMood(MOOD_OUTRAGED, UMI_OUTRAGED, tr("Outraged"));
-	addMood(MOOD_PLAYFUL, UMI_PLAYFUL, tr("Playful"));
-	addMood(MOOD_PROUD, UMI_PROUD, tr("Proud"));
-	addMood(MOOD_RELAXED, UMI_RELAXED, tr("Relaxed"));
-	addMood(MOOD_RELIEVED, UMI_RELIEVED, tr("Relieved"));
-	addMood(MOOD_REMORSEFUL, UMI_REMORSEFUL, tr("Remorseful"));
-	addMood(MOOD_RESTLESS, UMI_RESTLESS, tr("Restless"));
-	addMood(MOOD_SAD, UMI_SAD, tr("Sad"));
-	addMood(MOOD_SARCASTIC, UMI_SARCASTIC, tr("Sarcastic"));
-	addMood(MOOD_SERIOUS, UMI_SERIOUS, tr("Serious"));
-	addMood(MOOD_SHOCKED, UMI_SHOCKED, tr("Shocked"));
-	addMood(MOOD_SHY, UMI_SHY, tr("Shy"));
-	addMood(MOOD_SICK, UMI_SICK, tr("Sick"));
-	addMood(MOOD_SLEEPY, UMI_SLEEPY, tr("Sleepy"));
-	addMood(MOOD_SPONTANEOUS, UMI_SPONTANEOUS, tr("Spontaneous"));
-	addMood(MOOD_STRESSED, UMI_STRESSED, tr("Stressed"));
-	addMood(MOOD_STRONG, UMI_STRONG, tr("Strong"));
-	addMood(MOOD_SURPRISED, UMI_SURPRISED, tr("Surprised"));
-	addMood(MOOD_THANKFUL, UMI_THANKFUL, tr("Thankful"));
-	addMood(MOOD_THIRSTY, UMI_THIRSTY, tr("Thirsty"));
-	addMood(MOOD_TIRED, UMI_TIRED, tr("Tired"));
-	addMood(MOOD_UNDEFINED, UMI_UNDEFINED, tr("Undefined"));
-	addMood(MOOD_WEAK, UMI_WEAK, tr("Weak"));
-	addMood(MOOD_WORRIED, UMI_WORRIED, tr("Worried"));
+	addMood(MOOD_AFRAID, tr("Afraid"));
+	addMood(MOOD_AMAZED, tr("Amazed"));
+	addMood(MOOD_ANGRY, tr("Angry"));
+	addMood(MOOD_AMOROUS, tr("Amorous"));
+	addMood(MOOD_ANNOYED, tr("Annoyed"));
+	addMood(MOOD_ANXIOUS, tr("Anxious"));
+	addMood(MOOD_AROUSED, tr("Aroused"));
+	addMood(MOOD_ASHAMED, tr("Ashamed"));
+	addMood(MOOD_BORED, tr("Bored"));
+	addMood(MOOD_BRAVE, tr("Brave"));
+	addMood(MOOD_CALM, tr("Calm"));
+	addMood(MOOD_CAUTIOUS, tr("Cautious"));
+	addMood(MOOD_COLD, tr("Cold"));
+	addMood(MOOD_CONFIDENT, tr("Confident"));
+	addMood(MOOD_CONFUSED, tr("Confused"));
+	addMood(MOOD_CONTEMPLATIVE, tr("Contemplative"));
+	addMood(MOOD_CONTENTED, tr("Contented"));
+	addMood(MOOD_CRANKY, tr("Cranky"));
+	addMood(MOOD_CRAZY, tr("Crazy"));
+	addMood(MOOD_CREATIVE, tr("Creative"));
+	addMood(MOOD_CURIOUS, tr("Curious"));
+	addMood(MOOD_DEJECTED, tr("Dejected"));
+	addMood(MOOD_DEPRESSED, tr("Depressed"));
+	addMood(MOOD_DISAPPOINTED, tr("Disappointed"));
+	addMood(MOOD_DISGUSTED, tr("Disgusted"));
+	addMood(MOOD_DISMAYED, tr("Dismayed"));
+	addMood(MOOD_DISTRACTED, tr("Distracted"));
+	addMood(MOOD_EMBARRASSED, tr("Embarrassed"));
+	addMood(MOOD_ENVIOUS, tr("Envious"));
+	addMood(MOOD_EXCITED, tr("Excited"));
+	addMood(MOOD_FLIRTATIOUS, tr("Flirtatious"));
+	addMood(MOOD_FRUSTRATED, tr("Frustrated"));
+	addMood(MOOD_GRUMPY, tr("Grumpy"));
+	addMood(MOOD_GUILTY, tr("Guilty"));
+	addMood(MOOD_HAPPY, tr("Happy"));
+	addMood(MOOD_HOPEFUL, tr("Hopeful"));
+	addMood(MOOD_HOT, tr("Hot"));
+	addMood(MOOD_HUMBLED, tr("Humbled"));
+	addMood(MOOD_HUMILIATED, tr("Humiliated"));
+	addMood(MOOD_HUNGRY, tr("Hungry"));
+	addMood(MOOD_HURT, tr("Hurt"));
+	addMood(MOOD_IMPRESSED, tr("Impressed"));
+	addMood(MOOD_IN_AWE, tr("In awe"));
+	addMood(MOOD_IN_LOVE, tr("In love"));
+	addMood(MOOD_INDIGNANT, tr("Indignant"));
+	addMood(MOOD_INTERESTED, tr("Interested"));
+	addMood(MOOD_INTOXICATED, tr("Intoxicated"));
+	addMood(MOOD_INVINCIBLE, tr("Invincible"));
+	addMood(MOOD_JEALOUS, tr("Jealous"));
+	addMood(MOOD_LONELY, tr("Lonely"));
+	addMood(MOOD_LUCKY, tr("Lucky"));
+	addMood(MOOD_MEAN, tr("Mean"));
+	addMood(MOOD_MOODY, tr("Moody"));
+	addMood(MOOD_NERVOUS, tr("Nervous"));
+	addMood(MOOD_NEUTRAL, tr("Neutral"));
+	addMood(MOOD_OFFENDED, tr("Offended"));
+	addMood(MOOD_OUTRAGED, tr("Outraged"));
+	addMood(MOOD_PLAYFUL, tr("Playful"));
+	addMood(MOOD_PROUD, tr("Proud"));
+	addMood(MOOD_RELAXED, tr("Relaxed"));
+	addMood(MOOD_RELIEVED, tr("Relieved"));
+	addMood(MOOD_REMORSEFUL, tr("Remorseful"));
+	addMood(MOOD_RESTLESS, tr("Restless"));
+	addMood(MOOD_SAD, tr("Sad"));
+	addMood(MOOD_SARCASTIC, tr("Sarcastic"));
+	addMood(MOOD_SERIOUS, tr("Serious"));
+	addMood(MOOD_SHOCKED, tr("Shocked"));
+	addMood(MOOD_SHY, tr("Shy"));
+	addMood(MOOD_SICK, tr("Sick"));
+	addMood(MOOD_SLEEPY, tr("Sleepy"));
+	addMood(MOOD_SPONTANEOUS, tr("Spontaneous"));
+	addMood(MOOD_STRESSED, tr("Stressed"));
+	addMood(MOOD_STRONG, tr("Strong"));
+	addMood(MOOD_SURPRISED, tr("Surprised"));
+	addMood(MOOD_THANKFUL, tr("Thankful"));
+	addMood(MOOD_THIRSTY, tr("Thirsty"));
+	addMood(MOOD_TIRED, tr("Tired"));
+	addMood(MOOD_UNDEFINED, tr("Undefined"));
+	addMood(MOOD_WEAK, tr("Weak"));
+	addMood(MOOD_WORRIED, tr("Worried"));
 
 	return true;
 }
@@ -311,15 +298,12 @@ bool UserMood::setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AV
 
 bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 {
-	Jid ASenderJid;
-	QString AMoodName;
-	QString AMoodText;
-
 	QDomElement replyElem = AStanza.document().firstChildElement("message");
-
 	if(!replyElem.isNull())
 	{
-		ASenderJid = replyElem.attribute("from");
+		Jid senderJid;
+		Mood mood;
+		senderJid = replyElem.attribute("from");
 		QDomElement eventElem = replyElem.firstChildElement("event");
 		if(!eventElem.isNull())
 		{
@@ -333,57 +317,57 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 					if(!moodElem.isNull())
 					{
 						QDomElement choiseElem = moodElem.firstChildElement();
-						if(!choiseElem.isNull() && FMoodsCatalog.contains(moodElem.firstChildElement().nodeName()))
+						if(!choiseElem.isNull() && FMoodsCatalog.contains(choiseElem.nodeName()))
 						{
-							AMoodName = moodElem.firstChildElement().nodeName();
+							mood.keyname = choiseElem.nodeName();
 						}
 						QDomElement textElem = moodElem.firstChildElement("text");
-						if(!moodElem.isNull())
+						if(!textElem.isNull())
 						{
-							AMoodText = textElem.text();
+							mood.text = textElem.text();
 						}
 					}
+					else
+						return false;
 				}
 			}
 		}
+		setContactMood(AStreamJid, senderJid, mood);
 	}
-	setContactMood(AStreamJid, ASenderJid, AMoodName, AMoodText);
+	else
+		return false;
 
 	return true;
 }
 
-void UserMood::setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText)
+void UserMood::setMood(const Jid &AStreamJid, const Mood &AMood)
 {
-	QDomDocument doc("");
-	QDomElement root = doc.createElement("item");
-	doc.appendChild(root);
+	QDomDocument docElem("");
+	QDomElement rootElem = docElem.createElement("item");
+	docElem.appendChild(rootElem);
 
-	QDomElement mood = doc.createElementNS(MOOD_PROTOCOL_URL, "mood");
-	root.appendChild(mood);
-	if(AMoodKey != MOOD_NULL)
+	QDomElement moodElem = docElem.createElementNS(MOOD_PROTOCOL_URL, "mood");
+	rootElem.appendChild(moodElem);
+	if(AMood.keyname != MOOD_NULL)
 	{
-		QDomElement name = doc.createElement(AMoodKey);
-		mood.appendChild(name);
+		QDomElement nameElem = docElem.createElement(AMood.keyname);
+		moodElem.appendChild(nameElem);
+		QDomElement textElem = docElem.createElement("text");
+		moodElem.appendChild(textElem);
+		QDomText deskElem = docElem.createTextNode(AMood.text);
+		textElem.appendChild(deskElem);
 	}
 	else
 	{
-		QDomElement name = doc.createElement("");
-		mood.appendChild(name);
+		QDomElement nameElem = docElem.createElement("");
+		moodElem.appendChild(nameElem);
 	}
-	if(AMoodKey != MOOD_NULL)
-	{
-		QDomElement text = doc.createElement("text");
-		mood.appendChild(text);
-
-		QDomText t1 = doc.createTextNode(AMoodText);
-		text.appendChild(t1);
-	}
-	FPEPManager->publishItem(AStreamJid, MOOD_PROTOCOL_URL, root);
+	FPEPManager->publishItem(AStreamJid, MOOD_PROTOCOL_URL, rootElem);
 }
 
 void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 {
-	if (FNotifications && FContactsMood.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
+	if (FNotifications && FMoodsContacts.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
 	{
 		INotification notify;
 		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
@@ -471,20 +455,20 @@ void UserMood::onSetMoodActionTriggered(bool)
 	}
 }
 
-void UserMood::setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText)
+void UserMood::setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const Mood &AMood)
 {
-	if((contactMoodKey(ASenderJid) != AMoodName) || contactMoodText(ASenderJid) != AMoodText)
+	if((contactMoodKey(ASenderJid) != AMood.keyname) || contactMoodText(ASenderJid) != AMood.text)
 	{
-		if(!AMoodName.isEmpty())
+		if(AMood.keyname != MOOD_NULL)
 		{
 			MoodContact data;
-			data.keyname = AMoodName;
-			data.text = AMoodText;
-			FContactsMood.insert(ASenderJid.pBare(), data);
+			data.keyname = AMood.keyname;
+			data.text = AMood.text;
+			FMoodsContacts.insert(ASenderJid, data);
 			onShowNotification(AStreamJid, ASenderJid);
 		}
 		else
-			FContactsMood.remove(ASenderJid.pBare());
+			FMoodsContacts.remove(ASenderJid);
 	}
 	updateDataHolder(ASenderJid);
 }
@@ -542,22 +526,22 @@ QString UserMood::moodName(const QString &keyname) const
 
 QString UserMood::contactMoodKey(const Jid &contactJid) const
 {
-	return FContactsMood.value(contactJid.pBare()).keyname;
+	return FMoodsContacts.value(contactJid.pBare()).keyname;
 }
 
 QIcon UserMood::contactMoodIcon(const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).icon;
+	return FMoodsCatalog.value(FMoodsContacts.value(contactJid.pBare()).keyname).icon;
 }
 
 QString UserMood::contactMoodName(const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).locname;
+	return FMoodsCatalog.value(FMoodsContacts.value(contactJid.pBare()).keyname).locname;
 }
 
 QString UserMood::contactMoodText(const Jid &contactJid) const
 {
-	QString text = FContactsMood.value(contactJid.pBare()).text;
+	QString text = FMoodsContacts.value(contactJid.pBare()).text;
 	return text.replace("\n", "<br>");
 }
 
