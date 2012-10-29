@@ -29,7 +29,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.3";
+	APluginInfo->version = "0.4";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -377,10 +377,11 @@ void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
 			notify.data.insert(NDR_ICON,contactMoodIcon(AContactJid));
 			notify.data.insert(NDR_STREAM_JID,AStreamJid.full());
 			notify.data.insert(NDR_CONTACT_JID,AContactJid.full());
-			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
-			notify.data.insert(NDR_POPUP_TITLE,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
+			notify.data.insert(NDR_TOOLTIP,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
+			notify.data.insert(NDR_POPUP_CAPTION,tr("Mood changed"));
+			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(AStreamJid, AContactJid));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
-			notify.data.insert(NDR_POPUP_HTML,QString("[%1] %2").arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
+			notify.data.insert(NDR_POPUP_HTML,QString("%1 %2").arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
 			FNotifies.insert(FNotifications->appendNotification(notify),AContactJid);
 		}
 	}

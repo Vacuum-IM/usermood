@@ -360,12 +360,12 @@
         <translation>При получении уведомления о настроении</translation>
     </message>
     <message>
-        <source>User Mood Notification</source>
-        <translation>Уведомление настроения</translation>
-    </message>
-    <message>
         <source>changed mood</source>
         <translation>сменил настроение</translation>
+    </message>
+    <message>
+        <source>Mood changed</source>
+        <translation>Настроение изменено</translation>
     </message>
 </context>
 <context>

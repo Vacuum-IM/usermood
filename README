@@ -44,6 +44,10 @@ CHANGELOG
 =========
   LEGEND: [+]-New feature [*]-Enhancement [-]-Bug fix
 
+  v0.4
+  ------
+  [-] Notifications fixed, NDR_TOOLTIP added.
+
   v0.3
   ------
   [-] Small updated stanza read\write.
