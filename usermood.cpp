@@ -468,20 +468,15 @@ void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const 
 			contactMoodText(streamJid, senderJid) != mood.text)
 	{
 		IRoster *roster = FRosterPlugin!=NULL ? FRosterPlugin->findRoster(streamJid) : NULL;
-		QList<IRosterItem> ritems = roster!=NULL ? roster->rosterItems() : QList<IRosterItem>();
-		foreach(IRosterItem ritem, ritems)
+		if((roster!=NULL && roster->rosterItem(senderJid).isValid) || streamJid.pBare() == senderJid.pBare())
 		{
-			if ((ritem.isValid && ritem.itemJid.pBare().contains(senderJid.pBare())) ||
-					streamJid.pBare() == senderJid.pBare())
+			if(!mood.keyname.isEmpty())
 			{
-				if(!mood.keyname.isEmpty())
-				{
-					FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
-					onShowNotification(streamJid, senderJid);
-				}
-				else
-				FMoodsContacts[streamJid].remove(senderJid.pBare());
+				FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
+				onShowNotification(streamJid, senderJid);
 			}
+			else
+				FMoodsContacts[streamJid].remove(senderJid.pBare());
 		}
 	}
 	updateDataHolder(streamJid, senderJid);
