@@ -474,11 +474,14 @@ void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const 
 			if ((ritem.isValid && ritem.itemJid.pBare().contains(senderJid.pBare())) ||
 					streamJid.pBare() == senderJid.pBare())
 			{
-				FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
-				onShowNotification(streamJid, senderJid);
-			}
-			else
+				if(!mood.keyname.isEmpty())
+				{
+					FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
+					onShowNotification(streamJid, senderJid);
+				}
+				else
 				FMoodsContacts[streamJid].remove(senderJid.pBare());
+			}
 		}
 	}
 	updateDataHolder(streamJid, senderJid);
