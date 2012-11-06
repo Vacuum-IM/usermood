@@ -44,6 +44,12 @@ CHANGELOG
 =========
   LEGEND: [+]-New feature [*]-Enhancement [-]-Bug fix
 
+  v0.5
+  ------
+  [-] Fixed label on account and offline contacts.
+  [-] Duplicated notifications.
+  [-] Unnecessary label icons in roster.
+
   v0.4
   ------
   [-] Notifications fixed, NDR_TOOLTIP added.

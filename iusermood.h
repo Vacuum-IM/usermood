@@ -23,23 +23,17 @@ struct MoodData
 	QIcon icon;
 };
 
-struct MoodContact
-{
-	QString keyname;
-	QString text;
-};
-
 class IUserMood
 {
 public:
 	virtual QObject *instance() = 0;
-	virtual void setMood(const Jid &ASreamJid, const Mood &AMood) = 0;
+	virtual void setMood(const Jid &streamJid, const Mood &mood) = 0;
 	virtual QIcon moodIcon(const QString &keyname) const = 0;
 	virtual QString moodName(const QString &keyname) const = 0;
-	virtual QString contactMoodKey(const Jid &contactJid) const = 0;
-	virtual QIcon contactMoodIcon(const Jid &contactJid) const = 0;
-	virtual QString contactMoodName(const Jid &contactJid) const = 0;
-	virtual QString contactMoodText(const Jid &contactJid) const = 0;
+	virtual QString contactMoodKey(const Jid &streamJid, const Jid &contactJid) const = 0;
+	virtual QIcon contactMoodIcon(const Jid &streamJid, const Jid &contactJid) const = 0;
+	virtual QString contactMoodName(const Jid &streamJid, const Jid &contactJid) const = 0;
+	virtual QString contactMoodText(const Jid &streamJid, const Jid &contactJid) const = 0;
 //signals:
 };
 

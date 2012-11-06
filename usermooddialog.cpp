@@ -22,11 +22,11 @@ UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QHash<QString, MoodDa
 	ui.cmbMood->insertSeparator(1);
 
 	int pos;
-	pos = ui.cmbMood->findData(FUserMood->contactMoodKey(AStreamJid));
+	pos = ui.cmbMood->findData(FUserMood->contactMoodKey(FStreamJid, FStreamJid));
 	if(pos != -1)
 	{
 		ui.cmbMood->setCurrentIndex(pos);
-		ui.pteText->setPlainText(FUserMood->contactMoodText(AStreamJid));
+		ui.pteText->setPlainText(FUserMood->contactMoodText(FStreamJid, FStreamJid));
 	}
 	else
 		ui.cmbMood->setCurrentIndex(0);
