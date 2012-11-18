@@ -86,7 +86,7 @@ protected slots:
 	void onShowNotification(const Jid &streamJid, const Jid &senderJid);
 	void onNotificationActivated(int ANotifyId);
 	void onNotificationRemoved(int ANotifyId);
-	void onRosterIndexInserted(IRosterIndex *AIndex);
+//	void onRosterIndexInserted(IRosterIndex *AIndex);
 	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
 	void onSetMoodActionTriggered(bool);
 	void onStreamOpened(IXmppStream *AXmppStream);
