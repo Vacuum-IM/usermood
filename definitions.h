@@ -115,8 +115,8 @@
 //Option Widget Order
 #define OWO_USERMOOD 510
 
-//Roster Label Order
-#define RLO_USERMOOD RLAP_RIGHT_TOP + 260
+//Roster Labels
+#define RLID_USERMOOD AdvancedDelegateItem::makeId(AdvancedDelegateItem::MiddleCenter,128,AdvancedDelegateItem::AlignRightOrderMask | 260)
 
 //Roster ToolTip Order
 #define RTTO_USERMOOD 920

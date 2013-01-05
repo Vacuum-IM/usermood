@@ -18,15 +18,15 @@ UserMood::UserMood()
 	FNotifications = NULL;
 }
 
+UserMood::~UserMood()
+{
+
+}
+
 void UserMood::addMood(const QString &keyname, const QString &locname)
 {
 	MoodData moodData = {locname, IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(keyname)};
 	FMoodsCatalog.insert(keyname, moodData);
-}
-
-UserMood::~UserMood()
-{
-
 }
 
 void UserMood::pluginInfo(IPluginInfo *APluginInfo)
@@ -167,16 +167,16 @@ bool UserMood::initObjects()
 
 	if(FRostersViewPlugin)
 	{
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, int, Menu *)),SLOT(onRosterIndexContextMenu(const QList<IRosterIndex *> &, int, Menu *)));
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, int , QMultiMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, int , QMultiMap<int, QString> &)));
+		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)),SLOT(onRosterIndexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)));
+		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, quint32, QMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, quint32, QMap<int, QString> &)));
 	}
 
 	if(FRostersViewPlugin)
 	{
-		IRostersLabel label;
-		label.order = RLO_USERMOOD;
-		label.value = RDR_MOOD_NAME;
-		FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(label);
+		AdvancedDelegateItem notifyLabel(RLID_USERMOOD);
+		notifyLabel.d->kind = AdvancedDelegateItem::CustomData;
+		notifyLabel.d->data = RDR_MOOD_NAME;
+		FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(notifyLabel);
 	}
 
 	addMood(MOOD_NULL, tr("Without mood"));
@@ -387,7 +387,7 @@ void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 			notify.data.insert(NDR_POPUP_CAPTION,tr("Mood changed"));
 			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(streamJid, senderJid));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(senderJid));
-			notify.data.insert(NDR_POPUP_HTML,QString("%1 %2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
+			notify.data.insert(NDR_POPUP_HTML,QString("<b>%1:</b> %2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
 			FNotifies.insert(FNotifications->appendNotification(notify),senderJid);
 		}
 	}
@@ -409,9 +409,9 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 	}
 }
 
-void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
+void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu)
 {
-	if(ALabelId == RLID_DISPLAY && AIndexes.count() == 1)
+	if(ALabelId == FUserMoodLabelId && AIndexes.count() == 1 && AIndexes.first()->type()==RIT_STREAM_ROOT)
 	{
 		IRosterIndex *index = AIndexes.first();
 		if(index->type() == RIT_STREAM_ROOT)
@@ -537,9 +537,9 @@ void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid
 	}
 }
 
-void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips)
+void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips)
 {
-	if(ALabelId == RLID_DISPLAY || ALabelId == FUserMoodLabelId)
+	if(ALabelId == FUserMoodLabelId)
 	{
 		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
 		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();

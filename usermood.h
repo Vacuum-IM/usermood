@@ -26,10 +26,10 @@
 #include <definitions/resources.h>
 #include <definitions/rosterdataholderorders.h>
 #include <definitions/rosterindextyperole.h>
-#include <definitions/rosterlabelorders.h>
 #include <definitions/rostertooltiporders.h>
 
 #include <utils/action.h>
+#include <utils/advanceditemdelegate.h>
 #include <utils/menu.h>
 #include <utils/options.h>
 #include <utils/widgetmanager.h>
@@ -82,12 +82,12 @@ signals:
 protected slots:
 //    void onOptionsOpened();
 //    void onOptionsChanged(const OptionsNode &ANode);
-	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips);
+	void onRosterIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips);
 	void onShowNotification(const Jid &streamJid, const Jid &senderJid);
 	void onNotificationActivated(int ANotifyId);
 	void onNotificationRemoved(int ANotifyId);
 //	void onRosterIndexInserted(IRosterIndex *AIndex);
-	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu);
+	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu);
 	void onSetMoodActionTriggered(bool);
 	void onStreamOpened(IXmppStream *AXmppStream);
 	void onStreamClosed(IXmppStream *AXmppStream);
@@ -116,7 +116,7 @@ private:
 	INotifications *FNotifications;
 
 	int handlerId;
-	int FUserMoodLabelId;
+	quint32 FUserMoodLabelId;
 
 	QMap<int, Jid> FNotifies;
 	QHash<QString, MoodData> FMoodsCatalog;
