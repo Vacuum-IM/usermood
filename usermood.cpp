@@ -33,7 +33,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.5";
+	APluginInfo->version = "0.5.1";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -387,7 +387,10 @@ void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 			notify.data.insert(NDR_POPUP_CAPTION,tr("Mood changed"));
 			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(streamJid, senderJid));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(senderJid));
-			notify.data.insert(NDR_POPUP_HTML,QString("<b>%1:</b> %2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
+			if(!contactMoodText(streamJid, senderJid).isEmpty())
+				notify.data.insert(NDR_POPUP_HTML,QString("%1:<br>%2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
+			else
+				notify.data.insert(NDR_POPUP_HTML,QString("%1").arg(contactMoodName(streamJid, senderJid)));
 			FNotifies.insert(FNotifications->appendNotification(notify),senderJid);
 		}
 	}
@@ -411,7 +414,7 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu)
 {
-	if(ALabelId == FUserMoodLabelId && AIndexes.count() == 1 && AIndexes.first()->type()==RIT_STREAM_ROOT)
+	if (ALabelId == AdvancedDelegateItem::DisplayId)
 	{
 		IRosterIndex *index = AIndexes.first();
 		if(index->type() == RIT_STREAM_ROOT)
