@@ -91,94 +91,8 @@
 #define MOOD_WEAK "weak"
 #define MOOD_WORRIED "worried"
 
-//UserMood Icons
-#define UMI_AFRAID "afraid"
-#define UMI_AMAZED "amazed"
-#define UMI_ANGRY "angry"
-#define UMI_AMOROUS "amorous"
-#define UMI_ANNOYED "annoyed"
-#define UMI_ANXIOUS "anxious"
-#define UMI_AROUSED "aroused"
-#define UMI_ASHAMED "ashamed"
-#define UMI_BORED "bored"
-#define UMI_BRAVE "brave"
-#define UMI_CALM "calm"
-#define UMI_CAUTIOUS "cautious"
-#define UMI_COLD "cold"
-#define UMI_CONFIDENT "confident"
-#define UMI_CONFUSED "confused"
-#define UMI_CONTEMPLATIVE "contemplative"
-#define UMI_CONTENTED "contented"
-#define UMI_CRANKY "cranky"
-#define UMI_CRAZY "crazy"
-#define UMI_CREATIVE "creative"
-#define UMI_CURIOUS "curious"
-#define UMI_DEJECTED "dejected"
-#define UMI_DEPRESSED "depressed"
-#define UMI_DISAPPOINTED "disappointed"
-#define UMI_DISGUSTED "disgusted"
-#define UMI_DISMAYED "dismayed"
-#define UMI_DISTRACTED "distracted"
-#define UMI_EMBARRASSED "embarrassed"
-#define UMI_ENVIOUS "envious"
-#define UMI_EXCITED "excited"
-#define UMI_FLIRTATIOUS "flirtatious"
-#define UMI_FRUSTRATED "frustrated"
-#define UMI_GRUMPY "grumpy"
-#define UMI_GUILTY "guilty"
-#define UMI_HAPPY "happy"
-#define UMI_HOPEFUL "hopeful"
-#define UMI_HOT "hot"
-#define UMI_HUMBLED "humbled"
-#define UMI_HUMILIATED "humiliated"
-#define UMI_HUNGRY "hungry"
-#define UMI_HURT "hurt"
-#define UMI_IMPRESSED "impressed"
-#define UMI_IN_AWE "in_awe"
-#define UMI_IN_LOVE "in_love"
-#define UMI_INDIGNANT "indignant"
-#define UMI_INTERESTED "interested"
-#define UMI_INTOXICATED "intoxicated"
-#define UMI_INVINCIBLE "invincible"
-#define UMI_JEALOUS "jealous"
-#define UMI_LONELY "lonely"
-#define UMI_LUCKY "lucky"
-#define UMI_MEAN "mean"
-#define UMI_MOODY "moody"
-#define UMI_NERVOUS "nervous"
-#define UMI_NEUTRAL "neutral"
-#define UMI_OFFENDED "offended"
-#define UMI_OUTRAGED "outraged"
-#define UMI_PLAYFUL "playful"
-#define UMI_PROUD "proud"
-#define UMI_RELAXED "relaxed"
-#define UMI_RELIEVED "relieved"
-#define UMI_REMORSEFUL "remorseful"
-#define UMI_RESTLESS "restless"
-#define UMI_SAD "sad"
-#define UMI_SARCASTIC "sarcastic"
-#define UMI_SERIOUS "serious"
-#define UMI_SHOCKED "shocked"
-#define UMI_SHY "shy"
-#define UMI_SICK "sick"
-#define UMI_SLEEPY "sleepy"
-#define UMI_SPONTANEOUS "spontaneous"
-#define UMI_STRESSED "stressed"
-#define UMI_STRONG "strong"
-#define UMI_SURPRISED "surprised"
-#define UMI_THANKFUL "thankful"
-#define UMI_THIRSTY "thirsty"
-#define UMI_TIRED "tired"
-#define UMI_UNDEFINED "undefined"
-#define UMI_WEAK "weak"
-#define UMI_WORRIED "worried"
-
 //RostersView - ContextMenu
 #define AG_RVCM_USERMOOD 300
-
-
-//MenuIcons
-#define MNI_TRIVIALPLUGIN_MESSAGE "trivialpluginMessage"
 
 //Notification Types
 #define NNT_USERMOOD "UserMoodNotify"
@@ -201,10 +115,10 @@
 //Option Widget Order
 #define OWO_USERMOOD 510
 
-//Roster Label Order
-#define RLO_USERMOOD			RLAP_RIGHT_TOP + 260
+ //Roster Label Order
+#define RLO_USERMOOD RLAP_RIGHT_TOP + 260
 
 //Roster ToolTip Order
-#define RTTO_USERMOOD			920
+#define RTTO_USERMOOD 920
 
 #endif //DEF_USERMOOD_DEFINITIONS_H

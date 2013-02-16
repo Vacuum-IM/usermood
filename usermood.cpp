@@ -1,23 +1,24 @@
 #include "usermood.h"
 
-#include <QDebug>
-
 #define ADR_STREAM_JID	Action::DR_StreamJid
 #define RDR_MOOD_NAME	452
+
+#define DIC_PUBSUB                     "pubsub"
+#define DIT_PEP                        "pep"
 
 UserMood::UserMood()
 {
 	FMainWindowPlugin = NULL;
+	FPresencePlugin = NULL;
 	FPEPManager = NULL;
-	FServiceDiscovery = NULL;
+	FDiscovery = NULL;
 	FXmppStreams = NULL;
 	FOptionsManager = NULL;
-	FDiscovery = NULL;
+	FRoster = NULL;
+	FRosterPlugin = NULL;
 	FRostersModel = NULL;
 	FRostersViewPlugin = NULL;
-
-	//FUserMoodLabelId = -1;
-
+	FNotifications = NULL;
 }
 
 UserMood::~UserMood()
@@ -25,21 +26,23 @@ UserMood::~UserMood()
 
 }
 
+void UserMood::addMood(const QString &keyname, const QString &locname)
+{
+	MoodData moodData = {locname, IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(keyname)};
+	FMoodsCatalog.insert(keyname, moodData);
+}
+
 void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.1";
+	APluginInfo->version = "0.5.1";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
-	APluginInfo->dependences.append(MAINWINDOW_UUID);
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
 	APluginInfo->dependences.append(SERVICEDISCOVERY_UUID);
 	APluginInfo->dependences.append(XMPPSTREAMS_UUID);
 	APluginInfo->dependences.append(PRESENCE_UUID);
-	APluginInfo->dependences.append(ROSTERSMODEL_UUID);
-	APluginInfo->dependences.append(ROSTERSVIEW_UUID);
-	APluginInfo->dependences.append(NOTIFICATIONS_UUID);
 }
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
@@ -61,13 +64,18 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 	plugin = APluginManager->pluginInterface("IServiceDiscovery").value(0, NULL);
 	if(plugin)
 	{
-		FServiceDiscovery = qobject_cast<IServiceDiscovery *>(plugin->instance());
+		FDiscovery = qobject_cast<IServiceDiscovery *>(plugin->instance());
 	}
 
 	plugin = APluginManager->pluginInterface("IXmppStreams").value(0, NULL);
 	if(plugin)
 	{
 		FXmppStreams = qobject_cast<IXmppStreams *>(plugin->instance());
+		if(FXmppStreams)
+		{
+			connect(FXmppStreams->instance(),SIGNAL(opened(IXmppStream *)),SLOT(onStreamOpened(IXmppStream *)));
+			connect(FXmppStreams->instance(),SIGNAL(closed(IXmppStream *)),SLOT(onStreamClosed(IXmppStream *)));
+		}
 	}
 
 	plugin = APluginManager->pluginInterface("IPresencePlugin").value(0, NULL);
@@ -76,19 +84,27 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 		FPresencePlugin = qobject_cast<IPresencePlugin *>(plugin->instance());
 		if(FPresencePlugin)
 		{
-			//        connect(FPresencePlugin->instance(),SIGNAL(contactStateChanged(const Jid &, const Jid &, bool)),
-			//              SLOT(onContactStateChanged(const Jid &, const Jid &, bool)));
+			connect(FPresencePlugin->instance(),SIGNAL(contactStateChanged(const Jid &, const Jid &, bool)),
+					SLOT(onContactStateChanged(const Jid &, const Jid &, bool)));
 		}
+	}
+
+	plugin = APluginManager->pluginInterface("IRoster").value(0, NULL);
+	if(plugin)
+	{
+		FRoster = qobject_cast<IRoster *>(plugin->instance());
+	}
+
+	plugin = APluginManager->pluginInterface("IRosterPlugin").value(0,NULL);
+	if (plugin)
+	{
+		FRosterPlugin = qobject_cast<IRosterPlugin *>(plugin->instance());
 	}
 
 	plugin = APluginManager->pluginInterface("IRostersModel").value(0, NULL);
 	if(plugin)
 	{
 		FRostersModel = qobject_cast<IRostersModel *>(plugin->instance());
-		if(FRostersModel)
-		{
-			connect(FRostersModel->instance(), SIGNAL(indexInserted(IRosterIndex *)), SLOT(onRosterIndexInserted(IRosterIndex *)));
-		}
 	}
 
 	plugin = APluginManager->pluginInterface("IRostersViewPlugin").value(0, NULL);
@@ -114,13 +130,9 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 		FOptionsManager = qobject_cast<IOptionsManager *>(plugin->instance());
 	}
 
-	connect(Options::instance(), SIGNAL(optionsOpened()), SLOT(onOptionsOpened()));
-	connect(Options::instance(), SIGNAL(optionsChanged(const OptionsNode &)), SLOT(onOptionsChanged(const OptionsNode &)));
-
 	connect(APluginManager->instance(), SIGNAL(aboutToQuit()), this, SLOT(onApplicationQuit()));
 
-
-	return FMainWindowPlugin != NULL;
+	return FMainWindowPlugin != NULL && FRosterPlugin !=NULL && FPEPManager !=NULL;
 }
 
 bool UserMood::initObjects()
@@ -133,14 +145,13 @@ bool UserMood::initObjects()
 	feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 	feature.description = tr("Supports the exchange of information about user moods");
 	feature.var = MOOD_PROTOCOL_URL;
-
-	FServiceDiscovery->insertDiscoFeature(feature);
+	FDiscovery->insertDiscoFeature(feature);
 
 	feature.name = tr("User mood notification");
-	feature.var = MOOD_NOTIFY_PROTOCOL_URL;
 	feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 	feature.description = tr("Supports the exchange of information about user moods");
-	FServiceDiscovery->insertDiscoFeature(feature);
+	feature.var = MOOD_NOTIFY_PROTOCOL_URL;
+	FDiscovery->insertDiscoFeature(feature);
 
 	if (FNotifications)
 	{
@@ -149,7 +160,6 @@ bool UserMood::initObjects()
 		notifyType.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 		notifyType.title = tr("When receiving mood");
 		notifyType.kindMask = INotification::PopupWindow;
-		notifyType.kindDefs = notifyType.kindMask;
 		FNotifications->registerNotificationType(NNT_USERMOOD,notifyType);
 	}
 
@@ -161,106 +171,98 @@ bool UserMood::initObjects()
 	if(FRostersViewPlugin)
 	{
 		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, int, Menu *)),SLOT(onRosterIndexContextMenu(const QList<IRosterIndex *> &, int, Menu *)));
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, int , QMultiMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, int , QMultiMap<int, QString> &)));
+		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, int, QMultiMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, int, QMultiMap<int, QString> &)));
 	}
 
 	if(FRostersViewPlugin)
 	{
-		QMultiMap<int, QVariant> findData;
-		foreach(int type, rosterDataTypes())
-		findData.insertMulti(RDR_TYPE, type);
-		QList<IRosterIndex *> indexes = FRostersModel->rootIndex()->findChilds(findData, true);
-
 		IRostersLabel label;
 		label.order = RLO_USERMOOD;
 		label.value = RDR_MOOD_NAME;
 		FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(label);
-
-		foreach(IRosterIndex * index, indexes)
-		FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, index);
 	}
 
-	FMoodsCatalog.insert(MOOD_NULL, MoodData(tr("Without mood")));
-	FMoodsCatalog.insert(MOOD_AFRAID, MoodData(UMI_AFRAID, tr("Afraid")));
-	FMoodsCatalog.insert(MOOD_AMAZED, MoodData(UMI_AMAZED, tr("Amazed")));
-	FMoodsCatalog.insert(MOOD_ANGRY, MoodData(UMI_ANGRY, tr("Angry")));
-	FMoodsCatalog.insert(MOOD_AMOROUS, MoodData(UMI_AMOROUS, tr("Amorous")));
-	FMoodsCatalog.insert(MOOD_ANNOYED, MoodData(UMI_ANNOYED, tr("Annoyed")));
-	FMoodsCatalog.insert(MOOD_ANXIOUS, MoodData(UMI_ANXIOUS, tr("Anxious")));
-	FMoodsCatalog.insert(MOOD_AROUSED, MoodData(UMI_AROUSED, tr("Aroused")));
-	FMoodsCatalog.insert(MOOD_ASHAMED, MoodData(UMI_ASHAMED, tr("Ashamed")));
-	FMoodsCatalog.insert(MOOD_BORED, MoodData(UMI_BORED, tr("Bored")));
-	FMoodsCatalog.insert(MOOD_BRAVE, MoodData(UMI_BRAVE, tr("Brave")));
-	FMoodsCatalog.insert(MOOD_CALM, MoodData(UMI_CALM, tr("Calm")));
-	FMoodsCatalog.insert(MOOD_CAUTIOUS, MoodData(UMI_CAUTIOUS, tr("Cautious")));
-	FMoodsCatalog.insert(MOOD_COLD, MoodData(UMI_COLD, tr("Cold")));
-	FMoodsCatalog.insert(MOOD_CONFIDENT, MoodData(UMI_CONFIDENT, tr("Confident")));
-	FMoodsCatalog.insert(MOOD_CONFUSED, MoodData(UMI_CONFUSED, tr("Confused")));
-	FMoodsCatalog.insert(MOOD_CONTEMPLATIVE, MoodData(UMI_CONTEMPLATIVE, tr("Contemplative")));
-	FMoodsCatalog.insert(MOOD_CONTENTED, MoodData(UMI_CONTENTED, tr("Contented")));
-	FMoodsCatalog.insert(MOOD_CRANKY, MoodData(UMI_CRANKY, tr("Cranky")));
-	FMoodsCatalog.insert(MOOD_CRAZY, MoodData(UMI_CRAZY, tr("Crazy")));
-	FMoodsCatalog.insert(MOOD_CREATIVE, MoodData(UMI_CREATIVE, tr("Creative")));
-	FMoodsCatalog.insert(MOOD_CURIOUS, MoodData(UMI_CURIOUS, tr("Curious")));
-	FMoodsCatalog.insert(MOOD_DEJECTED, MoodData(UMI_DEJECTED, tr("Dejected")));
-	FMoodsCatalog.insert(MOOD_DEPRESSED, MoodData(UMI_DEPRESSED, tr("Depressed")));
-	FMoodsCatalog.insert(MOOD_DISAPPOINTED, MoodData(UMI_DISAPPOINTED, tr("Disappointed")));
-	FMoodsCatalog.insert(MOOD_DISGUSTED, MoodData(UMI_DISGUSTED, tr("Disgusted")));
-	FMoodsCatalog.insert(MOOD_DISMAYED, MoodData(UMI_DISMAYED, tr("Dismayed")));
-	FMoodsCatalog.insert(MOOD_DISTRACTED, MoodData(UMI_DISTRACTED, tr("Distracted")));
-	FMoodsCatalog.insert(MOOD_EMBARRASSED, MoodData(UMI_EMBARRASSED, tr("Embarrassed")));
-	FMoodsCatalog.insert(MOOD_ENVIOUS, MoodData(UMI_ENVIOUS, tr("Envious")));
-	FMoodsCatalog.insert(MOOD_EXCITED, MoodData(UMI_EXCITED, tr("Excited")));
-	FMoodsCatalog.insert(MOOD_FLIRTATIOUS, MoodData(UMI_FLIRTATIOUS, tr("Flirtatious")));
-	FMoodsCatalog.insert(MOOD_FRUSTRATED, MoodData(UMI_FRUSTRATED, tr("Frustrated")));
-	FMoodsCatalog.insert(MOOD_GRUMPY, MoodData(UMI_GRUMPY, tr("Grumpy")));
-	FMoodsCatalog.insert(MOOD_GUILTY, MoodData(UMI_GUILTY, tr("Guilty")));
-	FMoodsCatalog.insert(MOOD_HAPPY, MoodData(UMI_HAPPY, tr("Happy")));
-	FMoodsCatalog.insert(MOOD_HOPEFUL, MoodData(UMI_HOPEFUL, tr("Hopeful")));
-	FMoodsCatalog.insert(MOOD_HOT, MoodData(UMI_HOT, tr("Hot")));
-	FMoodsCatalog.insert(MOOD_HUMBLED, MoodData(UMI_HUMBLED, tr("Humbled")));
-	FMoodsCatalog.insert(MOOD_HUMILIATED, MoodData(UMI_HUMILIATED, tr("Humiliated")));
-	FMoodsCatalog.insert(MOOD_HUNGRY, MoodData(UMI_HUNGRY, tr("Hungry")));
-	FMoodsCatalog.insert(MOOD_HURT, MoodData(UMI_HURT, tr("Hurt")));
-	FMoodsCatalog.insert(MOOD_IMPRESSED, MoodData(UMI_IMPRESSED, tr("Impressed")));
-	FMoodsCatalog.insert(MOOD_IN_AWE, MoodData(UMI_IN_AWE, tr("In awe")));
-	FMoodsCatalog.insert(MOOD_IN_LOVE, MoodData(UMI_IN_LOVE, tr("In love")));
-	FMoodsCatalog.insert(MOOD_INDIGNANT, MoodData(UMI_INDIGNANT, tr("Indignant")));
-	FMoodsCatalog.insert(MOOD_INTERESTED, MoodData(UMI_INTERESTED, tr("Interested")));
-	FMoodsCatalog.insert(MOOD_INTOXICATED, MoodData(UMI_INTOXICATED, tr("Intoxicated")));
-	FMoodsCatalog.insert(MOOD_INVINCIBLE, MoodData(UMI_INVINCIBLE, tr("Invincible")));
-	FMoodsCatalog.insert(MOOD_JEALOUS, MoodData(UMI_JEALOUS, tr("Jealous")));
-	FMoodsCatalog.insert(MOOD_LONELY, MoodData(UMI_LONELY, tr("Lonely")));
-	FMoodsCatalog.insert(MOOD_LUCKY, MoodData(UMI_LUCKY, tr("Lucky")));
-	FMoodsCatalog.insert(MOOD_MEAN, MoodData(UMI_MEAN, tr("Mean")));
-	FMoodsCatalog.insert(MOOD_MOODY, MoodData(UMI_MOODY, tr("Moody")));
-	FMoodsCatalog.insert(MOOD_NERVOUS, MoodData(UMI_NERVOUS, tr("Nervous")));
-	FMoodsCatalog.insert(MOOD_NEUTRAL, MoodData(UMI_NEUTRAL, tr("Neutral")));
-	FMoodsCatalog.insert(MOOD_OFFENDED, MoodData(UMI_OFFENDED, tr("Offended")));
-	FMoodsCatalog.insert(MOOD_OUTRAGED, MoodData(UMI_OUTRAGED, tr("Outraged")));
-	FMoodsCatalog.insert(MOOD_PLAYFUL, MoodData(UMI_PLAYFUL, tr("Playful")));
-	FMoodsCatalog.insert(MOOD_PROUD, MoodData(UMI_PROUD, tr("Proud")));
-	FMoodsCatalog.insert(MOOD_RELAXED, MoodData(UMI_RELAXED, tr("Relaxed")));
-	FMoodsCatalog.insert(MOOD_RELIEVED, MoodData(UMI_RELIEVED, tr("Relieved")));
-	FMoodsCatalog.insert(MOOD_REMORSEFUL, MoodData(UMI_REMORSEFUL, tr("Remorseful")));
-	FMoodsCatalog.insert(MOOD_RESTLESS, MoodData(UMI_RESTLESS, tr("Restless")));
-	FMoodsCatalog.insert(MOOD_SAD, MoodData(UMI_SAD, tr("Sad")));
-	FMoodsCatalog.insert(MOOD_SARCASTIC, MoodData(UMI_SARCASTIC, tr("Sarcastic")));
-	FMoodsCatalog.insert(MOOD_SERIOUS, MoodData(UMI_SERIOUS, tr("Serious")));
-	FMoodsCatalog.insert(MOOD_SHOCKED, MoodData(UMI_SHOCKED, tr("Shocked")));
-	FMoodsCatalog.insert(MOOD_SHY, MoodData(UMI_SHY, tr("Shy")));
-	FMoodsCatalog.insert(MOOD_SICK, MoodData(UMI_SICK, tr("Sick")));
-	FMoodsCatalog.insert(MOOD_SLEEPY, MoodData(UMI_SLEEPY, tr("Sleepy")));
-	FMoodsCatalog.insert(MOOD_SPONTANEOUS, MoodData(UMI_SPONTANEOUS, tr("Spontaneous")));
-	FMoodsCatalog.insert(MOOD_STRESSED, MoodData(UMI_STRESSED, tr("Stressed")));
-	FMoodsCatalog.insert(MOOD_STRONG, MoodData(UMI_STRONG, tr("Strong")));
-	FMoodsCatalog.insert(MOOD_SURPRISED, MoodData(UMI_SURPRISED, tr("Surprised")));
-	FMoodsCatalog.insert(MOOD_THANKFUL, MoodData(UMI_THANKFUL, tr("Thankful")));
-	FMoodsCatalog.insert(MOOD_THIRSTY, MoodData(UMI_THIRSTY, tr("Thirsty")));
-	FMoodsCatalog.insert(MOOD_TIRED, MoodData(UMI_TIRED, tr("Tired")));
-	FMoodsCatalog.insert(MOOD_UNDEFINED, MoodData(UMI_UNDEFINED, tr("Undefined")));
-	FMoodsCatalog.insert(MOOD_WEAK, MoodData(UMI_WEAK, tr("Weak"))); 
-	FMoodsCatalog.insert(MOOD_WORRIED, MoodData(UMI_WORRIED, tr("Worried")));
+	addMood(MOOD_NULL, tr("Without mood"));
+	addMood(MOOD_AFRAID, tr("Afraid"));
+	addMood(MOOD_AMAZED, tr("Amazed"));
+	addMood(MOOD_ANGRY, tr("Angry"));
+	addMood(MOOD_AMOROUS, tr("Amorous"));
+	addMood(MOOD_ANNOYED, tr("Annoyed"));
+	addMood(MOOD_ANXIOUS, tr("Anxious"));
+	addMood(MOOD_AROUSED, tr("Aroused"));
+	addMood(MOOD_ASHAMED, tr("Ashamed"));
+	addMood(MOOD_BORED, tr("Bored"));
+	addMood(MOOD_BRAVE, tr("Brave"));
+	addMood(MOOD_CALM, tr("Calm"));
+	addMood(MOOD_CAUTIOUS, tr("Cautious"));
+	addMood(MOOD_COLD, tr("Cold"));
+	addMood(MOOD_CONFIDENT, tr("Confident"));
+	addMood(MOOD_CONFUSED, tr("Confused"));
+	addMood(MOOD_CONTEMPLATIVE, tr("Contemplative"));
+	addMood(MOOD_CONTENTED, tr("Contented"));
+	addMood(MOOD_CRANKY, tr("Cranky"));
+	addMood(MOOD_CRAZY, tr("Crazy"));
+	addMood(MOOD_CREATIVE, tr("Creative"));
+	addMood(MOOD_CURIOUS, tr("Curious"));
+	addMood(MOOD_DEJECTED, tr("Dejected"));
+	addMood(MOOD_DEPRESSED, tr("Depressed"));
+	addMood(MOOD_DISAPPOINTED, tr("Disappointed"));
+	addMood(MOOD_DISGUSTED, tr("Disgusted"));
+	addMood(MOOD_DISMAYED, tr("Dismayed"));
+	addMood(MOOD_DISTRACTED, tr("Distracted"));
+	addMood(MOOD_EMBARRASSED, tr("Embarrassed"));
+	addMood(MOOD_ENVIOUS, tr("Envious"));
+	addMood(MOOD_EXCITED, tr("Excited"));
+	addMood(MOOD_FLIRTATIOUS, tr("Flirtatious"));
+	addMood(MOOD_FRUSTRATED, tr("Frustrated"));
+	addMood(MOOD_GRUMPY, tr("Grumpy"));
+	addMood(MOOD_GUILTY, tr("Guilty"));
+	addMood(MOOD_HAPPY, tr("Happy"));
+	addMood(MOOD_HOPEFUL, tr("Hopeful"));
+	addMood(MOOD_HOT, tr("Hot"));
+	addMood(MOOD_HUMBLED, tr("Humbled"));
+	addMood(MOOD_HUMILIATED, tr("Humiliated"));
+	addMood(MOOD_HUNGRY, tr("Hungry"));
+	addMood(MOOD_HURT, tr("Hurt"));
+	addMood(MOOD_IMPRESSED, tr("Impressed"));
+	addMood(MOOD_IN_AWE, tr("In awe"));
+	addMood(MOOD_IN_LOVE, tr("In love"));
+	addMood(MOOD_INDIGNANT, tr("Indignant"));
+	addMood(MOOD_INTERESTED, tr("Interested"));
+	addMood(MOOD_INTOXICATED, tr("Intoxicated"));
+	addMood(MOOD_INVINCIBLE, tr("Invincible"));
+	addMood(MOOD_JEALOUS, tr("Jealous"));
+	addMood(MOOD_LONELY, tr("Lonely"));
+	addMood(MOOD_LUCKY, tr("Lucky"));
+	addMood(MOOD_MEAN, tr("Mean"));
+	addMood(MOOD_MOODY, tr("Moody"));
+	addMood(MOOD_NERVOUS, tr("Nervous"));
+	addMood(MOOD_NEUTRAL, tr("Neutral"));
+	addMood(MOOD_OFFENDED, tr("Offended"));
+	addMood(MOOD_OUTRAGED, tr("Outraged"));
+	addMood(MOOD_PLAYFUL, tr("Playful"));
+	addMood(MOOD_PROUD, tr("Proud"));
+	addMood(MOOD_RELAXED, tr("Relaxed"));
+	addMood(MOOD_RELIEVED, tr("Relieved"));
+	addMood(MOOD_REMORSEFUL, tr("Remorseful"));
+	addMood(MOOD_RESTLESS, tr("Restless"));
+	addMood(MOOD_SAD, tr("Sad"));
+	addMood(MOOD_SARCASTIC, tr("Sarcastic"));
+	addMood(MOOD_SERIOUS, tr("Serious"));
+	addMood(MOOD_SHOCKED, tr("Shocked"));
+	addMood(MOOD_SHY, tr("Shy"));
+	addMood(MOOD_SICK, tr("Sick"));
+	addMood(MOOD_SLEEPY, tr("Sleepy"));
+	addMood(MOOD_SPONTANEOUS, tr("Spontaneous"));
+	addMood(MOOD_STRESSED, tr("Stressed"));
+	addMood(MOOD_STRONG, tr("Strong"));
+	addMood(MOOD_SURPRISED, tr("Surprised"));
+	addMood(MOOD_THANKFUL, tr("Thankful"));
+	addMood(MOOD_THIRSTY, tr("Thirsty"));
+	addMood(MOOD_TIRED, tr("Tired"));
+	addMood(MOOD_UNDEFINED, tr("Undefined"));
+	addMood(MOOD_WEAK, tr("Weak"));
+	addMood(MOOD_WORRIED, tr("Worried"));
 
 	return true;
 }
@@ -287,7 +289,9 @@ QVariant UserMood::rosterData(const IRosterIndex *AIndex, int ARole) const
 {
 	if(ARole == RDR_MOOD_NAME)
 	{
-		QIcon pic = contactMoodIcon(AIndex->data(RDR_PREP_BARE_JID).toString());
+		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
+		Jid senderJid = AIndex->data(RDR_PREP_BARE_JID).toString();
+		QIcon pic = contactMoodIcon(streamJid, senderJid);
 		return pic;
 	}
 	return QVariant();
@@ -301,17 +305,14 @@ bool UserMood::setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AV
 	return false;
 }
 
-bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
+bool UserMood::processPEPEvent(const Jid &streamJid, const Stanza &AStanza)
 {
-	Jid ASenderJid;
-	QString AMoodName;
-	QString AMoodText;
-
 	QDomElement replyElem = AStanza.document().firstChildElement("message");
-
 	if(!replyElem.isNull())
 	{
-		ASenderJid = replyElem.attribute("from");
+		Mood data;
+		Jid senderJid = replyElem.attribute("from");
+
 		QDomElement eventElem = replyElem.firstChildElement("event");
 		if(!eventElem.isNull())
 		{
@@ -325,69 +326,75 @@ bool UserMood::processPEPEvent(const Jid &AStreamJid, const Stanza &AStanza)
 					if(!moodElem.isNull())
 					{
 						QDomElement choiseElem = moodElem.firstChildElement();
-						if(!choiseElem.isNull() && FMoodsCatalog.contains(moodElem.firstChildElement().nodeName()))
+						if(!choiseElem.isNull() && FMoodsCatalog.contains(choiseElem.nodeName()))
 						{
-							AMoodName = moodElem.firstChildElement().nodeName();
+							data.keyname = choiseElem.nodeName();
 						}
 						QDomElement textElem = moodElem.firstChildElement("text");
-						if(!moodElem.isNull())
+						if(!textElem.isNull())
 						{
-							AMoodText = textElem.text();
+							data.text = textElem.text();
 						}
 					}
+					else
+						return false;
 				}
 			}
 		}
+		setContactMood(streamJid, senderJid, data);
 	}
-	setContactMood(AStreamJid, ASenderJid, AMoodName, AMoodText);
+	else
+		return false;
 
 	return true;
 }
 
-void UserMood::setMood(const Jid &AStreamJid, const QString &AMoodKey, const QString &AMoodText)
+void UserMood::setMood(const Jid &streamJid, const Mood &mood)
 {
-	QDomDocument doc("");
-	QDomElement root = doc.createElement("item");
-	doc.appendChild(root);
+	QDomDocument docElem("");
+	QDomElement rootElem = docElem.createElement("item");
+	docElem.appendChild(rootElem);
 
-	QDomElement mood = doc.createElementNS(MOOD_PROTOCOL_URL, "mood");
-	root.appendChild(mood);
-	if(AMoodKey != MOOD_NULL)
+	QDomElement moodElem = docElem.createElementNS(MOOD_PROTOCOL_URL, "mood");
+	rootElem.appendChild(moodElem);
+	if(mood.keyname != MOOD_NULL)
 	{
-		QDomElement name = doc.createElement(AMoodKey);
-		mood.appendChild(name);
+		QDomElement nameElem = docElem.createElement(mood.keyname);
+		moodElem.appendChild(nameElem);
+		QDomElement textElem = docElem.createElement("text");
+		moodElem.appendChild(textElem);
+		QDomText deskElem = docElem.createTextNode(mood.text);
+		textElem.appendChild(deskElem);
 	}
 	else
 	{
-		QDomElement name = doc.createElement("");
-		mood.appendChild(name);
+		QDomElement nameElem = docElem.createElement("");
+		moodElem.appendChild(nameElem);
 	}
-	if(AMoodKey != MOOD_NULL)
-	{
-		QDomElement text = doc.createElement("text");
-		mood.appendChild(text);
-
-		QDomText t1 = doc.createTextNode(AMoodText);
-		text.appendChild(t1);
-	}
-	FPEPManager->publishItem(AStreamJid, MOOD_PROTOCOL_URL, root);
+	FPEPManager->publishItem(streamJid, MOOD_PROTOCOL_URL, rootElem);
 }
 
-void UserMood::onShowNotification(const Jid &AStreamJid, const Jid &AContactJid)
+void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 {
-	if (FNotifications && /*FNotifications->notifications().isEmpty() &&*/ FContactsMood.contains(AContactJid.pBare()) /*&& AContactJid.pBare() != AStreamJid.pBare()*/)
+	if (FNotifications && FMoodsContacts[streamJid].contains(senderJid.pBare()) && streamJid.pBare() != senderJid.pBare())
 	{
 		INotification notify;
 		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
 		if ((notify.kinds & INotification::PopupWindow) > 0)
 		{
 			notify.typeId = NNT_USERMOOD;
-			notify.data.insert(NDR_ICON,contactMoodIcon(AContactJid));
-			notify.data.insert(NDR_POPUP_CAPTION,tr("User Mood Notification"));
-			notify.data.insert(NDR_POPUP_TITLE,QString("%1 %2").arg(FNotifications->contactName(AStreamJid, AContactJid)).arg(tr("changed mood")));
-			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(AContactJid));
-			notify.data.insert(NDR_POPUP_HTML,QString("[%1] %2").arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
-			FNotifies.insert(FNotifications->appendNotification(notify),AContactJid);
+			notify.data.insert(NDR_ICON,contactMoodIcon(streamJid, senderJid));
+			notify.data.insert(NDR_STREAM_JID,streamJid.full());
+			notify.data.insert(NDR_CONTACT_JID,senderJid.full());
+			notify.data.insert(NDR_TOOLTIP,QString("%1 %2").arg(FNotifications->contactName(streamJid, senderJid)).arg(tr("changed mood")));
+			notify.data.insert(NDR_POPUP_CAPTION,tr("Mood changed"));
+			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(streamJid, senderJid));
+			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(senderJid));
+			if(!contactMoodText(streamJid, senderJid).isEmpty())
+				notify.data.insert(NDR_POPUP_HTML,QString("%1:<br>%2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
+			else
+				notify.data.insert(NDR_POPUP_HTML,QString("%1").arg(contactMoodName(streamJid, senderJid)));
+			FNotifies.insert(FNotifications->appendNotification(notify),senderJid);
 		}
 	}
 }
@@ -410,21 +417,19 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 
 void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, int ALabelId, Menu *AMenu)
 {
-	if(ALabelId == RLID_DISPLAY && AIndexes.count() == 1)
+	if(ALabelId == RLID_DISPLAY && AIndexes.first()->type()==RIT_STREAM_ROOT)
 	{
 		IRosterIndex *index = AIndexes.first();
 		if(index->type() == RIT_STREAM_ROOT)
 		{
-			Jid AStreamJid = index->data(RDR_STREAM_JID).toString();
-			IPresence *presence = FPresencePlugin != NULL ? FPresencePlugin->findPresence(AStreamJid) : NULL;
+			Jid streamJid = index->data(RDR_STREAM_JID).toString();
+			IPresence *presence = FPresencePlugin != NULL ? FPresencePlugin->findPresence(streamJid) : NULL;
 			if(presence && presence->isOpen())
 			{
-				Jid AContactJid = index->data(RDR_FULL_JID).toString();
 				int show = index->data(RDR_SHOW).toInt();
-				QStringList features = FDiscovery != NULL ? FDiscovery->discoInfo(AStreamJid, AContactJid).features : QStringList();
-				if(show != IPresence::Offline && show != IPresence::Error && !features.contains(MOOD_PROTOCOL_URL))
+				if(show != IPresence::Offline && show != IPresence::Error && isSupported(streamJid))
 				{
-					Action *action = createSetMoodAction(AStreamJid, MOOD_PROTOCOL_URL, AMenu);
+					Action *action = createSetMoodAction(streamJid, MOOD_PROTOCOL_URL, AMenu);
 					AMenu->addAction(action, AG_RVCM_USERMOOD, false);
 				}
 			}
@@ -432,19 +437,19 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, i
 	}
 }
 
-Action *UserMood::createSetMoodAction(const Jid &AStreamJid, const QString &AFeature, QObject *AParent) const
+Action *UserMood::createSetMoodAction(const Jid &streamJid, const QString &AFeature, QObject *AParent) const
 {
 	if(AFeature == MOOD_PROTOCOL_URL)
 	{
 		Action *action = new Action(AParent);
 		action->setText(tr("Mood"));
 		QIcon menuicon;
-		if(!contactMoodIcon(AStreamJid).isNull())
-			menuicon = contactMoodIcon(AStreamJid);
+		if(!contactMoodIcon(streamJid, streamJid).isNull())
+			menuicon = contactMoodIcon(streamJid, streamJid);
 		else
 			menuicon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 		action->setIcon(menuicon);
-		action->setData(ADR_STREAM_JID, AStreamJid.full());
+		action->setData(ADR_STREAM_JID, streamJid.full());
 		connect(action, SIGNAL(triggered(bool)), SLOT(onSetMoodActionTriggered(bool)));
 		return action;
 	}
@@ -456,66 +461,115 @@ void UserMood::onSetMoodActionTriggered(bool)
 	Action *action = qobject_cast<Action *>(sender());
 	if(action)
 	{
-		Jid AStreamJid = action->data(ADR_STREAM_JID).toString();
+		Jid streamJid = action->data(ADR_STREAM_JID).toString();
 		UserMoodDialog *dialog;
-		dialog = new UserMoodDialog(this, FMoodsCatalog, AStreamJid);
+		dialog = new UserMoodDialog(this, FMoodsCatalog, streamJid);
 		WidgetManager::showActivateRaiseWindow(dialog);
 	}
 }
 
-void UserMood::setContactMood(const Jid &AStreamJid, const Jid &ASenderJid, const QString &AMoodName, const QString &AMoodText)
+void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const Mood &mood)
 {
-	if((contactMoodKey(ASenderJid) != AMoodName) || contactMoodText(ASenderJid) != AMoodText)
+	if((contactMoodKey(streamJid, senderJid) != mood.keyname) ||
+			contactMoodText(streamJid, senderJid) != mood.text)
 	{
-		if(!AMoodName.isEmpty())
+		IRoster *roster = FRosterPlugin!=NULL ? FRosterPlugin->findRoster(streamJid) : NULL;
+		if((roster!=NULL && roster->rosterItem(senderJid).isValid) || streamJid.pBare() == senderJid.pBare())
 		{
-			MoodContact data;
-			data.keyname = AMoodName;
-			data.text = AMoodText;
-			FContactsMood.insert(ASenderJid.pBare(), data);
-			onShowNotification(AStreamJid, ASenderJid);
+			if(!mood.keyname.isEmpty())
+			{
+				FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
+				onShowNotification(streamJid, senderJid);
+			}
+			else
+				FMoodsContacts[streamJid].remove(senderJid.pBare());
 		}
-		else
-			FContactsMood.remove(ASenderJid.pBare());
 	}
-	updateDataHolder(ASenderJid);
+	updateDataHolder(streamJid, senderJid);
 }
 
-void UserMood::updateDataHolder(const Jid &ASenderJid)
+void UserMood::updateDataHolder(const Jid &streamJid, const Jid &senderJid)
 {
-	if(FRostersModel)
+	if(FRostersViewPlugin && FRostersModel)
 	{
 		QMultiMap<int, QVariant> findData;
 		foreach(int type, rosterDataTypes())
-		findData.insert(RDR_TYPE, type);
-		if(!ASenderJid.isEmpty())
-			findData.insert(RDR_PREP_BARE_JID, ASenderJid.pBare());
-		QList<IRosterIndex *> indexes = FRostersModel->rootIndex()->findChilds(findData, true);
-		foreach(IRosterIndex *index, indexes)
+			findData.insert(RDR_TYPE, type);
+		findData.insert(RDR_PREP_BARE_JID, senderJid.pBare());
+
+		foreach (IRosterIndex *index, FRostersModel->streamRoot(streamJid)->findChilds(findData, true))
 		{
+			if(FMoodsContacts[streamJid].contains(senderJid.pBare()))
+				FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
+			else
+				FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
 			emit rosterDataChanged(index, RDR_MOOD_NAME);
 		}
 	}
 }
 
-void UserMood::onRosterIndexInserted(IRosterIndex *AIndex)
+void UserMood::onStreamOpened(IXmppStream *AXmppStream)
 {
-	if(FRostersViewPlugin && rosterDataTypes().contains(AIndex->type()))
+	if (FRostersViewPlugin)
 	{
-		FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId, AIndex);
+		IRostersModel *model = FRostersViewPlugin->rostersView()->rostersModel();
+		IRosterIndex *index = model!=NULL ? model->streamRoot(AXmppStream->streamJid()) : NULL;
+		if (index!=NULL)
+			FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
 	}
 }
 
-void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips)
+void UserMood::onStreamClosed(IXmppStream *AXmppStream)
+{
+	Jid streamJid = AXmppStream->streamJid();
+	FMoodsContacts.remove(streamJid);
+	if(FRostersViewPlugin && FRostersModel)
+	{
+		IRosterIndex *index = FRostersModel->streamRoot(streamJid);
+		FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
+		emit rosterDataChanged(index, RDR_MOOD_NAME);
+	}
+}
+
+void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid, bool AStateOnline)
+{
+	if (!AStateOnline)
+	{
+		if (FMoodsContacts[streamJid].contains(contactJid.pBare()))
+		{
+			FMoodsContacts[streamJid].remove(contactJid.pBare());
+			updateDataHolder(streamJid, contactJid);
+		}
+	}
+}
+
+void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMap<int, QString> &AToolTips)
 {
 	if(ALabelId == RLID_DISPLAY || ALabelId == FUserMoodLabelId)
 	{
-		Jid AContactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
-		if(!contactMoodKey(AContactJid).isEmpty())
+		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
+		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
+		if(!contactMoodKey(streamJid, contactJid).isEmpty())
 		{
-			AToolTips.insert(RTTO_USERMOOD, QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>").arg(tr("Mood:")).arg(contactMoodName(AContactJid)).arg(contactMoodText(AContactJid)));
+			QString tooltip_full = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid)).arg(contactMoodText(streamJid, contactJid));
+			QString tooltip_short = QString("%1 <div style='margin-left:10px;'>%2</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid));
+			AToolTips.insert(RTTO_USERMOOD, contactMoodText(streamJid, contactJid).isEmpty() ? tooltip_short : tooltip_full);
 		}
 	}
+}
+
+bool UserMood::isSupported(const Jid &AStreamJid) const
+{
+	bool supported = false;
+	IDiscoInfo dinfo = FDiscovery!=NULL ? FDiscovery->discoInfo(AStreamJid, AStreamJid.domain()) : IDiscoInfo();
+	for (int i=0; !supported && i<dinfo.identity.count(); i++)
+	{
+		const IDiscoIdentity &ident = dinfo.identity.at(i);
+		supported = ident.category==DIC_PUBSUB && ident.type==DIT_PEP;
+	}
+	return supported;
 }
 
 QIcon UserMood::moodIcon(const QString &keyname) const
@@ -528,24 +582,24 @@ QString UserMood::moodName(const QString &keyname) const
 	return FMoodsCatalog.value(keyname).locname;
 }
 
-QString UserMood::contactMoodKey(const Jid &contactJid) const
+QString UserMood::contactMoodKey(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FContactsMood.value(contactJid.pBare()).keyname;
+	return FMoodsContacts[streamJid].value(contactJid.pBare()).keyname;
 }
 
-QIcon UserMood::contactMoodIcon(const Jid &contactJid) const
+QIcon UserMood::contactMoodIcon(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).icon;
+	return FMoodsCatalog.value(FMoodsContacts[streamJid].value(contactJid.pBare()).keyname).icon;
 }
 
-QString UserMood::contactMoodName(const Jid &contactJid) const
+QString UserMood::contactMoodName(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FContactsMood.value(contactJid.pBare()).keyname).locname;
+	return FMoodsCatalog.value(FMoodsContacts[streamJid].value(contactJid.pBare()).keyname).locname;
 }
 
-QString UserMood::contactMoodText(const Jid &contactJid) const
+QString UserMood::contactMoodText(const Jid &streamJid, const Jid &contactJid) const
 {
-	QString text = FContactsMood.value(contactJid.pBare()).text;
+	QString text = FMoodsContacts[streamJid].value(contactJid.pBare()).text;
 	return text.replace("\n", "<br>");
 }
 

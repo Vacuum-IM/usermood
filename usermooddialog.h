@@ -15,7 +15,7 @@ class UserMoodDialog : public QDialog
 	Q_OBJECT
 
 public:
-	UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, Jid &AStreamJid, QWidget *AParent = 0);
+	UserMoodDialog(IUserMood *AUserMood, const QHash<QString, MoodData> &AMoodsCatalog, Jid &AStreamJid, QWidget *AParent = 0);
 	~UserMoodDialog();
 
 protected slots:

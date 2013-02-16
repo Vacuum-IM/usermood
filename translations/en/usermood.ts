@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" sourcelanguage="en">
+<TS version="2.0" language="en" sourcelanguage="en">
 <context>
     <name>UserMood</name>
     <message>
@@ -352,10 +352,6 @@
         <translation>Worried</translation>
     </message>
     <message>
-        <source>User Mood Notification</source>
-        <translation>User Mood Notification</translation>
-    </message>
-    <message>
         <source>changed mood</source>
         <translation>changed mood</translation>
     </message>
@@ -366,6 +362,10 @@
     <message>
         <source>Mood:</source>
         <translation>Mood:</translation>
+    </message>
+    <message>
+        <source>Mood changed</source>
+        <translation>Mood changed</translation>
     </message>
 </context>
 <context>

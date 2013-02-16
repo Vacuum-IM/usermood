@@ -1,6 +1,6 @@
 #include "usermooddialog.h"
 
-UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodData> &AMoodsCatalog, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
+UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QHash<QString, MoodData> &AMoodsCatalog, Jid &AStreamJid, QWidget *parent) : QDialog(parent)
 {
 	ui.setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -10,10 +10,11 @@ UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodDat
 	FUserMood = AUserMood;
 	FStreamJid = AStreamJid;
 
-	QMap<QString, MoodData>::const_iterator it = AMoodsCatalog.constBegin();
-	for(; it != AMoodsCatalog.constEnd(); ++it)
+	QHashIterator<QString, MoodData> i(AMoodsCatalog);
+	while (i.hasNext())
 	{
-		ui.cmbMood->addItem(it->icon, it->locname, it.key());
+		i.next();
+		ui.cmbMood->addItem(i.value().icon, i.value().locname, i.key());
 	}
 	ui.cmbMood->model()->sort(Qt::AscendingOrder);
 	ui.cmbMood->removeItem(ui.cmbMood->findData(MOOD_NULL));
@@ -21,11 +22,11 @@ UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodDat
 	ui.cmbMood->insertSeparator(1);
 
 	int pos;
-	pos = ui.cmbMood->findData(FUserMood->contactMoodKey(AStreamJid));
+	pos = ui.cmbMood->findData(FUserMood->contactMoodKey(FStreamJid, FStreamJid));
 	if(pos != -1)
 	{
 		ui.cmbMood->setCurrentIndex(pos);
-		ui.pteText->setPlainText(FUserMood->contactMoodText(AStreamJid));
+		ui.pteText->setPlainText(FUserMood->contactMoodText(FStreamJid, FStreamJid));
 	}
 	else
 		ui.cmbMood->setCurrentIndex(0);
@@ -36,9 +37,10 @@ UserMoodDialog::UserMoodDialog(IUserMood *AUserMood, const QMap<QString, MoodDat
 
 void UserMoodDialog::onDialogAccepted()
 {
-	QString AMoodKey = ui.cmbMood->itemData(ui.cmbMood->currentIndex()).toString();
-	QString AMoodText = ui.pteText->toPlainText();
-	FUserMood->setMood(FStreamJid, AMoodKey, AMoodText);
+	Mood data;
+	data.keyname = ui.cmbMood->itemData(ui.cmbMood->currentIndex()).toString();
+	data.text = ui.pteText->toPlainText();
+	FUserMood->setMood(FStreamJid, data);
 	accept();
 }
 

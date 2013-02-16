@@ -360,11 +360,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>User Mood Notification</source>
+        <source>changed mood</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>changed mood</source>
+        <source>Mood changed</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
