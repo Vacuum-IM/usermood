@@ -1,7 +1,7 @@
 #include "usermood.h"
 
-#define ADR_STREAM_JID	Action::DR_StreamJid
-#define RDR_MOOD_NAME	452
+#define ADR_STREAM_JID Action::DR_StreamJid
+#define RDR_MOOD_NAME 452
 
 UserMood::UserMood()
 {
@@ -492,11 +492,12 @@ void UserMood::updateDataHolder(const Jid &streamJid, const Jid &senderJid)
 		QMultiMap<int, QVariant> findData;
 		foreach(int type, rosterDataTypes())
 			findData.insert(RDR_TYPE, type);
-		findData.insert(RDR_PREP_BARE_JID, senderJid.pBare());
+		if (!senderJid.isEmpty())
+			findData.insert(RDR_PREP_BARE_JID, senderJid.pBare());
 
 		foreach (IRosterIndex *index, FRostersModel->streamRoot(streamJid)->findChilds(findData, true))
 		{
-			if(FMoodsContacts[streamJid].contains(senderJid.pBare()))
+			if(FMoodsContacts[streamJid].contains(index->data(RDR_PREP_BARE_JID).toString()))
 				FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
 			else
 				FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
