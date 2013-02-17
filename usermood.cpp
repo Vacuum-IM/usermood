@@ -1,10 +1,10 @@
 #include "usermood.h"
 
-#define ADR_STREAM_JID	Action::DR_StreamJid
-#define RDR_MOOD_NAME	452
+#define ADR_STREAM_JID Action::DR_StreamJid
+#define RDR_MOOD_NAME 452
 
-#define DIC_PUBSUB                     "pubsub"
-#define DIT_PEP                        "pep"
+#define DIC_PUBSUB "pubsub"
+#define DIT_PEP "pep"
 
 UserMood::UserMood()
 {
@@ -171,7 +171,7 @@ bool UserMood::initObjects()
 	if(FRostersViewPlugin)
 	{
 		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, int, Menu *)),SLOT(onRosterIndexContextMenu(const QList<IRosterIndex *> &, int, Menu *)));
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, int, QMultiMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, int, QMultiMap<int, QString> &)));
+		connect(FRostersViewPlugin->rostersView()->instance(),SIGNAL(indexToolTips(IRosterIndex *, int, QMultiMap<int,QString> &)), SLOT(onRosterIndexToolTips(IRosterIndex *, int, QMultiMap<int,QString> &)));
 	}
 
 	if(FRostersViewPlugin)
@@ -373,7 +373,6 @@ void UserMood::setMood(const Jid &streamJid, const Mood &mood)
 	}
 	FPEPManager->publishItem(streamJid, MOOD_PROTOCOL_URL, rootElem);
 }
-
 void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 {
 	if (FNotifications && FMoodsContacts[streamJid].contains(senderJid.pBare()) && streamJid.pBare() != senderJid.pBare())
@@ -495,11 +494,11 @@ void UserMood::updateDataHolder(const Jid &streamJid, const Jid &senderJid)
 		QMultiMap<int, QVariant> findData;
 		foreach(int type, rosterDataTypes())
 			findData.insert(RDR_TYPE, type);
-		findData.insert(RDR_PREP_BARE_JID, senderJid.pBare());
-
+		if (!senderJid.isEmpty())
+			findData.insert(RDR_PREP_BARE_JID,senderJid.pBare());
 		foreach (IRosterIndex *index, FRostersModel->streamRoot(streamJid)->findChilds(findData, true))
 		{
-			if(FMoodsContacts[streamJid].contains(senderJid.pBare()))
+			if(FMoodsContacts[streamJid].contains(index->data(RDR_PREP_BARE_JID).toString()))
 				FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
 			else
 				FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
@@ -543,7 +542,7 @@ void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid
 	}
 }
 
-void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMap<int, QString> &AToolTips)
+void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips)
 {
 	if(ALabelId == RLID_DISPLAY || ALabelId == FUserMoodLabelId)
 	{

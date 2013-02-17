@@ -82,7 +82,7 @@ signals:
 protected slots:
 //    void onOptionsOpened();
 //    void onOptionsChanged(const OptionsNode &ANode);
-	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMap<int, QString> &AToolTips);
+	void onRosterIndexToolTips(IRosterIndex *AIndex, int ALabelId, QMultiMap<int, QString> &AToolTips);
 	void onShowNotification(const Jid &streamJid, const Jid &senderJid);
 	void onNotificationActivated(int ANotifyId);
 	void onNotificationRemoved(int ANotifyId);
