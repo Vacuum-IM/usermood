@@ -543,7 +543,7 @@ void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid
 
 void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips)
 {
-	if(ALabelId == FUserMoodLabelId)
+	if ((ALabelId==AdvancedDelegateItem::DisplayId && rosterDataTypes().contains(AIndex->type())) || ALabelId == FUserMoodLabelId)
 	{
 		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
 		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();

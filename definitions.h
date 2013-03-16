@@ -119,6 +119,6 @@
 #define RLID_USERMOOD AdvancedDelegateItem::makeId(AdvancedDelegateItem::MiddleCenter,128,AdvancedDelegateItem::AlignRightOrderMask | 260)
 
 //Roster ToolTip Order
-#define RTTO_USERMOOD 920
+#define RTTO_USERMOOD 910
 
 #endif //DEF_USERMOOD_DEFINITIONS_H
