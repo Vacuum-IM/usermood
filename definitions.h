@@ -119,6 +119,6 @@
 #define RLO_USERMOOD RLAP_RIGHT_TOP + 260
 
 //Roster ToolTip Order
-#define RTTO_USERMOOD 920
+#define RTTO_USERMOOD 910
 
 #endif //DEF_USERMOOD_DEFINITIONS_H
