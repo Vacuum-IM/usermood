@@ -115,6 +115,9 @@
 //Option Widget Order
 #define OWO_USERMOOD 510
 
+//Roster Data Holder Orders
+#define RDHO_USERMOOD 1000
+
 //Roster Labels
 #define RLID_USERMOOD AdvancedDelegateItem::makeId(AdvancedDelegateItem::MiddleCenter,128,AdvancedDelegateItem::AlignRightOrderMask | 260)
 

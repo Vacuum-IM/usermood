@@ -3,6 +3,8 @@
 #define ADR_STREAM_JID Action::DR_StreamJid
 #define RDR_MOOD_NAME 452
 
+static const QList<int> RosterKinds = QList<int>() << RIK_CONTACT << RIK_CONTACTS_ROOT << RIK_STREAM_ROOT;
+
 UserMood::UserMood()
 {
 	FMainWindowPlugin = NULL;
@@ -33,7 +35,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.5.1";
+	APluginInfo->version = "0.6";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -44,7 +46,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 {
-	AInitOrder = 11;
+	AInitOrder = 25;
 
 	IPlugin *plugin = APluginManager->pluginInterface("IMainWindowPlugin").value(0);
 	if(plugin)
@@ -104,10 +106,17 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 		FRostersModel = qobject_cast<IRostersModel *>(plugin->instance());
 	}
 
-	plugin = APluginManager->pluginInterface("IRostersViewPlugin").value(0, NULL);
-	if(plugin)
+	plugin = APluginManager->pluginInterface("IRostersViewPlugin").value(0,NULL);
+	if (plugin)
 	{
 		FRostersViewPlugin = qobject_cast<IRostersViewPlugin *>(plugin->instance());
+		if (FRostersViewPlugin)
+		{
+			connect(FRostersViewPlugin->rostersView()->instance(),SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)),
+				SLOT(onRostersViewIndexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)));
+			connect(FRostersViewPlugin->rostersView()->instance(),SIGNAL(indexToolTips(IRosterIndex *, quint32, QMap<int,QString> &)),
+				SLOT(onRostersViewIndexToolTips(IRosterIndex *, quint32, QMap<int,QString> &)));
+		}
 	}
 
 	plugin = APluginManager->pluginInterface("INotifications").value(0, NULL);
@@ -162,13 +171,7 @@ bool UserMood::initObjects()
 
 	if(FRostersModel)
 	{
-		FRostersModel->insertDefaultDataHolder(this);
-	}
-
-	if(FRostersViewPlugin)
-	{
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)),SLOT(onRosterIndexContextMenu(const QList<IRosterIndex *> &, quint32, Menu *)));
-		connect(FRostersViewPlugin->rostersView()->instance(), SIGNAL(indexToolTips(IRosterIndex *, quint32, QMap<int, QString> &)),SLOT(onRosterIndexToolTips(IRosterIndex *, quint32, QMap<int, QString> &)));
+		FRostersModel->insertRosterDataHolder(RDHO_USERMOOD,this);
 	}
 
 	if(FRostersViewPlugin)
@@ -265,37 +268,39 @@ bool UserMood::initObjects()
 }
 
 
-int UserMood::rosterDataOrder() const
+QList<int> UserMood::rosterDataRoles(int AOrder) const
 {
-	return RDHO_DEFAULT;
+	if (AOrder == RDHO_USERMOOD)
+		return QList<int>() << RDR_MOOD_NAME;
+	return QList<int>();
 }
 
-QList<int> UserMood::rosterDataRoles() const
-{
-	static const QList<int> indexRoles = QList<int>() << RDR_MOOD_NAME;
-	return indexRoles;
-}
 
-QList<int> UserMood::rosterDataTypes() const
+QVariant UserMood::rosterData(int AOrder, const IRosterIndex *AIndex, int ARole) const
 {
-	static const QList<int> indexTypes = QList<int>() << RIT_STREAM_ROOT << RIT_CONTACT;
-	return indexTypes;
-}
-
-QVariant UserMood::rosterData(const IRosterIndex *AIndex, int ARole) const
-{
-	if(ARole == RDR_MOOD_NAME)
+	Q_UNUSED(ARole);
+	if (AOrder == RDHO_USERMOOD)
 	{
-		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
-		Jid senderJid = AIndex->data(RDR_PREP_BARE_JID).toString();
-		QIcon pic = contactMoodIcon(streamJid, senderJid);
-		return pic;
+		switch (AIndex->kind())
+		{
+		case RIK_STREAM_ROOT:
+		case RIK_CONTACT:
+		case RIK_CONTACTS_ROOT:
+			{
+				Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
+				Jid senderJid = AIndex->data(RDR_PREP_BARE_JID).toString();
+				QIcon pic = contactMoodIcon(streamJid, senderJid);
+				return pic;
+			}
+			break;
+		}
 	}
 	return QVariant();
 }
 
-bool UserMood::setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue)
+bool UserMood::setRosterData(int AOrder, const QVariant &AValue, IRosterIndex *AIndex, int ARole)
 {
+	Q_UNUSED(AOrder);
 	Q_UNUSED(AIndex);
 	Q_UNUSED(ARole);
 	Q_UNUSED(AValue);
@@ -412,12 +417,12 @@ void UserMood::onNotificationRemoved(int ANotifyId)
 	}
 }
 
-void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu)
+void UserMood::onRostersViewIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu)
 {
 	if (ALabelId == AdvancedDelegateItem::DisplayId)
 	{
 		IRosterIndex *index = AIndexes.first();
-		if(index->type() == RIT_STREAM_ROOT)
+		if(index->kind() == RIK_STREAM_ROOT)
 		{
 			Jid streamJid = index->data(RDR_STREAM_JID).toString();
 			IPresence *presence = FPresencePlugin != NULL ? FPresencePlugin->findPresence(streamJid) : NULL;
@@ -430,6 +435,23 @@ void UserMood::onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, q
 					AMenu->addAction(action, AG_RVCM_USERMOOD, false);
 				}
 			}
+		}
+	}
+}
+
+void UserMood::onRostersViewIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips)
+{
+	if ((ALabelId==AdvancedDelegateItem::DisplayId && RosterKinds.contains(AIndex->kind())) || ALabelId == FUserMoodLabelId)
+	{
+		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
+		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
+		if(!contactMoodKey(streamJid, contactJid).isEmpty())
+		{
+			QString tooltip_full = QString("<b>%1</b> %2<br>%3</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid)).arg(contactMoodText(streamJid, contactJid));
+			QString tooltip_short = QString("<b>%1</b> %2</div>")
+					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid));
+			AToolTips.insert(RTTO_USERMOOD, contactMoodText(streamJid, contactJid).isEmpty() ? tooltip_short : tooltip_full);
 		}
 	}
 }
@@ -487,13 +509,13 @@ void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const 
 
 void UserMood::updateDataHolder(const Jid &streamJid, const Jid &senderJid)
 {
-	if(FRostersViewPlugin && FRostersModel)
+	if(FRostersModel)
 	{
 		QMultiMap<int, QVariant> findData;
-		foreach(int type, rosterDataTypes())
-			findData.insert(RDR_TYPE, type);
-		if (!senderJid.isEmpty())
-			findData.insert(RDR_PREP_BARE_JID, senderJid.pBare());
+		findData.insert(RDR_PREP_BARE_JID,senderJid.pBare());
+		findData.insert(RDR_KIND,RIK_STREAM_ROOT);
+		findData.insert(RDR_KIND,RIK_CONTACT);
+		findData.insert(RDR_KIND,RIK_CONTACTS_ROOT);
 
 		foreach (IRosterIndex *index, FRostersModel->streamRoot(streamJid)->findChilds(findData, true))
 		{
@@ -537,23 +559,6 @@ void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid
 		{
 			FMoodsContacts[streamJid].remove(contactJid.pBare());
 			updateDataHolder(streamJid, contactJid);
-		}
-	}
-}
-
-void UserMood::onRosterIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips)
-{
-	if ((ALabelId==AdvancedDelegateItem::DisplayId && rosterDataTypes().contains(AIndex->type())) || ALabelId == FUserMoodLabelId)
-	{
-		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
-		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
-		if(!contactMoodKey(streamJid, contactJid).isEmpty())
-		{
-			QString tooltip_full = QString("%1 <div style='margin-left:10px;'>%2<br>%3</div>")
-					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid)).arg(contactMoodText(streamJid, contactJid));
-			QString tooltip_short = QString("%1 <div style='margin-left:10px;'>%2</div>")
-					.arg(tr("Mood:")).arg(contactMoodName(streamJid, contactJid));
-			AToolTips.insert(RTTO_USERMOOD, contactMoodText(streamJid, contactJid).isEmpty() ? tooltip_short : tooltip_full);
 		}
 	}
 }

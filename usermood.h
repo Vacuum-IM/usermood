@@ -25,7 +25,8 @@
 #include <definitions/optionvalues.h>
 #include <definitions/resources.h>
 #include <definitions/rosterdataholderorders.h>
-#include <definitions/rosterindextyperole.h>
+#include <definitions/rosterindexkinds.h>
+#include <definitions/rosterindexroles.h>
 #include <definitions/rostertooltiporders.h>
 
 #include <utils/action.h>
@@ -57,11 +58,9 @@ public:
 	virtual bool startPlugin() { return true; }
 
 	//IRosterDataHolder
-	virtual int rosterDataOrder() const;
-	virtual QList<int> rosterDataRoles() const;
-	virtual QList<int> rosterDataTypes() const;
-	virtual QVariant rosterData(const IRosterIndex *AIndex, int ARole) const;
-	virtual bool setRosterData(IRosterIndex *AIndex, int ARole, const QVariant &AValue);
+	virtual QList<int> rosterDataRoles(int AOrder) const;
+	virtual QVariant rosterData(int AOrder, const IRosterIndex *AIndex, int ARole) const;
+	virtual bool setRosterData(int AOrder, const QVariant &AValue, IRosterIndex *AIndex, int ARole);
 
 	//IPEPHandler
 	virtual bool processPEPEvent(const Jid &streamJid, const Stanza &AStanza);
@@ -80,18 +79,19 @@ signals:
 	void rosterDataChanged(IRosterIndex *AIndex = NULL, int ARole = 0);
 
 protected slots:
-//    void onOptionsOpened();
-//    void onOptionsChanged(const OptionsNode &ANode);
-	void onRosterIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips);
+	//INotification
 	void onShowNotification(const Jid &streamJid, const Jid &senderJid);
 	void onNotificationActivated(int ANotifyId);
 	void onNotificationRemoved(int ANotifyId);
-//	void onRosterIndexInserted(IRosterIndex *AIndex);
-	void onRosterIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu);
-	void onSetMoodActionTriggered(bool);
+	//IRostersView
+	void onRostersViewIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu);
+	void onRostersViewIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips);
+	//IXmppStreams
 	void onStreamOpened(IXmppStream *AXmppStream);
 	void onStreamClosed(IXmppStream *AXmppStream);
+	//IPresencePlugin
 	void onContactStateChanged(const Jid &streamJid, const Jid &contactJid, bool AStateOnline);
+	void onSetMoodActionTriggered(bool);
 	void onApplicationQuit();
 
 protected:
@@ -115,15 +115,13 @@ private:
 	IRostersViewPlugin *FRostersViewPlugin;
 	INotifications *FNotifications;
 
+private:
 	int handlerId;
 	quint32 FUserMoodLabelId;
 
 	QMap<int, Jid> FNotifies;
 	QHash<QString, MoodData> FMoodsCatalog;
 	QHash<Jid, QHash <QString, Mood> > FMoodsContacts;
-
 };
 
 #endif // USERMOOD_H
-
-
