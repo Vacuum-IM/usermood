@@ -22,7 +22,7 @@ protected slots:
 	void onDialogAccepted();
 
 private:
-	Ui::UserMoodDialog ui;
+	Ui::userMoodDialog ui;
 	IUserMood *FUserMood;
 
 	Jid FStreamJid;
