@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0">
+<TS version="2.0" language="pl" sourcelanguage="en">
 <context>
     <name>UserMood</name>
     <message>
@@ -365,6 +365,10 @@
     </message>
     <message>
         <source>Mood changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show user moods icons</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

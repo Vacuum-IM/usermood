@@ -98,25 +98,22 @@
 #define NNT_USERMOOD "UserMoodNotify"
 
 //Notification Type Orders
-#define NTO_USERMOOD_NOTIFY 275
+#define NTO_USERMOOD_NOTIFY 280
 
 //Menu Icons
 #define MNI_USERMOOD "usermood"
 
 //Options
-#define OPV_UT_SHOW_ROSTER_LABEL "show-roster-label"
-
-//Opton Nodes
-#define OPN_USERMOOD "UserMood"
-
-//Option Node Order
-#define ONO_USERMOOD 865
+#define OPV_ROSTER_USER_MOOD_ICON_SHOW "roster.user.mood.icon.show"
 
 //Option Widget Order
-#define OWO_USERMOOD 510
+#define OWO_ROSTER_USER_MOOD 530
+
+//Roster Labels Holder Orders
+#define RLHO_USERMOOD 1030
 
 //Roster Data Holder Orders
-#define RDHO_USERMOOD 1000
+#define RDHO_USERMOOD 1010
 
 //Roster Labels
 #define RLID_USERMOOD AdvancedDelegateItem::makeId(AdvancedDelegateItem::MiddleCenter,128,AdvancedDelegateItem::AlignRightOrderMask | 260)

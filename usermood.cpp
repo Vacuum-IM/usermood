@@ -1,7 +1,7 @@
 #include "usermood.h"
 
 #define ADR_STREAM_JID Action::DR_StreamJid
-#define RDR_MOOD_NAME 452
+#define RDR_USERMOOD 452
 
 static const QList<int> RosterKinds = QList<int>() << RIK_CONTACT << RIK_CONTACTS_ROOT << RIK_STREAM_ROOT;
 
@@ -32,14 +32,14 @@ UserMood::~UserMood()
 void UserMood::addMood(const QString &keyname, const QString &locname)
 {
 	MoodData moodData = {locname, IconStorage::staticStorage(RSR_STORAGE_MOODICONS)->getIcon(keyname)};
-	FMoodsCatalog.insert(keyname, moodData);
+	FMoods.insert(keyname, moodData);
 }
 
 void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.6";
+	APluginInfo->version = "0.7";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -50,7 +50,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 
 bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 {
-	AInitOrder = 25;
+	AInitOrder = 50;
 
 	IPlugin *plugin = APluginManager->pluginInterface("IMainWindowPlugin").value(0);
 	if(plugin)
@@ -76,7 +76,6 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 		FXmppStreams = qobject_cast<IXmppStreams *>(plugin->instance());
 		if(FXmppStreams)
 		{
-			connect(FXmppStreams->instance(),SIGNAL(opened(IXmppStream *)),SLOT(onStreamOpened(IXmppStream *)));
 			connect(FXmppStreams->instance(),SIGNAL(closed(IXmppStream *)),SLOT(onStreamClosed(IXmppStream *)));
 		}
 	}
@@ -138,6 +137,11 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 	if(plugin)
 	{
 		FOptionsManager = qobject_cast<IOptionsManager *>(plugin->instance());
+		if (FOptionsManager)
+		{
+			connect(Options::instance(),SIGNAL(optionsOpened()),SLOT(onOptionsOpened()));
+			connect(Options::instance(),SIGNAL(optionsChanged(OptionsNode)),SLOT(onOptionsChanged(OptionsNode)));
+		}
 	}
 
 	connect(APluginManager->instance(), SIGNAL(aboutToQuit()), this, SLOT(onApplicationQuit()));
@@ -180,10 +184,17 @@ bool UserMood::initObjects()
 
 	if(FRostersViewPlugin)
 	{
-		AdvancedDelegateItem notifyLabel(RLID_USERMOOD);
-		notifyLabel.d->kind = AdvancedDelegateItem::CustomData;
-		notifyLabel.d->data = RDR_MOOD_NAME;
-		FUserMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(notifyLabel);
+		AdvancedDelegateItem label(RLID_USERMOOD);
+		label.d->kind = AdvancedDelegateItem::CustomData;
+		label.d->data = RDR_USERMOOD;
+		FMoodLabelId = FRostersViewPlugin->rostersView()->registerLabel(label);
+
+		FRostersViewPlugin->rostersView()->insertLabelHolder(RLHO_USERMOOD,this);
+	}
+
+	if (FOptionsManager)
+	{
+		FOptionsManager->insertOptionsHolder(this);
 	}
 
 	addMood(MOOD_NULL, tr("Without mood"));
@@ -271,35 +282,51 @@ bool UserMood::initObjects()
 	return true;
 }
 
+bool UserMood::initSettings()
+{
+	Options::setDefaultValue(OPV_ROSTER_USER_MOOD_ICON_SHOW,true);
+
+	return true;
+}
+
+QMultiMap<int, IOptionsWidget *> UserMood::optionsWidgets(const QString &ANodeId, QWidget *AParent)
+{
+	QMultiMap<int, IOptionsWidget *> widgets;
+	if (FOptionsManager && ANodeId == OPN_ROSTER)
+	{
+		widgets.insertMulti(OWO_ROSTER_USER_MOOD, FOptionsManager->optionsNodeWidget(Options::node(OPV_ROSTER_USER_MOOD_ICON_SHOW),tr("Show user moods icons"),AParent));
+	}
+	return widgets;
+}
+
 
 QList<int> UserMood::rosterDataRoles(int AOrder) const
 {
 	if (AOrder == RDHO_USERMOOD)
-		return QList<int>() << RDR_MOOD_NAME;
+		return QList<int>() << RDR_USERMOOD;
 	return QList<int>();
 }
 
-
 QVariant UserMood::rosterData(int AOrder, const IRosterIndex *AIndex, int ARole) const
 {
-	Q_UNUSED(ARole);
 	if (AOrder == RDHO_USERMOOD)
 	{
 		switch (AIndex->kind())
 		{
 		case RIK_STREAM_ROOT:
 		case RIK_CONTACT:
-		case RIK_CONTACTS_ROOT:
 			{
-				Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
-				Jid senderJid = AIndex->data(RDR_PREP_BARE_JID).toString();
-				QIcon pic = contactMoodIcon(streamJid, senderJid);
-				return pic;
+				if (ARole == RDR_USERMOOD)
+				{
+					Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
+					Jid senderJid = AIndex->data(RDR_PREP_BARE_JID).toString();
+					return QIcon(contactMoodIcon(streamJid, senderJid));
+				}
 			}
 			break;
 		}
 	}
-	return QVariant();
+return QVariant();
 }
 
 bool UserMood::setRosterData(int AOrder, const QVariant &AValue, IRosterIndex *AIndex, int ARole)
@@ -309,6 +336,21 @@ bool UserMood::setRosterData(int AOrder, const QVariant &AValue, IRosterIndex *A
 	Q_UNUSED(ARole);
 	Q_UNUSED(AValue);
 	return false;
+}
+
+QList<quint32> UserMood::rosterLabels(int AOrder, const IRosterIndex *AIndex) const
+{
+	QList<quint32> labels;
+	if (AOrder==RLHO_USERMOOD && FMoodIconsVisible && !AIndex->data(RDR_USERMOOD).isNull())
+		labels.append(FMoodLabelId);
+	return labels;
+}
+
+AdvancedDelegateItem UserMood::rosterLabel(int AOrder, quint32 ALabelId, const IRosterIndex *AIndex) const
+{
+	Q_UNUSED(AOrder);
+	Q_UNUSED(AIndex);
+	return FRostersViewPlugin->rostersView()->registeredLabel(ALabelId);
 }
 
 bool UserMood::processPEPEvent(const Jid &streamJid, const Stanza &AStanza)
@@ -332,7 +374,7 @@ bool UserMood::processPEPEvent(const Jid &streamJid, const Stanza &AStanza)
 					if(!moodElem.isNull())
 					{
 						QDomElement choiseElem = moodElem.firstChildElement();
-						if(!choiseElem.isNull() && FMoodsCatalog.contains(choiseElem.nodeName()))
+						if(!choiseElem.isNull() && FMoods.contains(choiseElem.nodeName()))
 						{
 							data.keyname = choiseElem.nodeName();
 						}
@@ -377,12 +419,13 @@ void UserMood::setMood(const Jid &streamJid, const Mood &mood)
 		QDomElement nameElem = docElem.createElement("");
 		moodElem.appendChild(nameElem);
 	}
+
 	FPEPManager->publishItem(streamJid, MOOD_PROTOCOL_URL, rootElem);
 }
 
 void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 {
-	if (FNotifications && FMoodsContacts[streamJid].contains(senderJid.pBare()) && streamJid.pBare() != senderJid.pBare())
+	if (FNotifications && FContacts[streamJid].contains(senderJid.pBare()) && streamJid.pBare() != senderJid.pBare())
 	{
 		INotification notify;
 		notify.kinds = FNotifications->enabledTypeNotificationKinds(NNT_USERMOOD);
@@ -408,17 +451,13 @@ void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 void UserMood::onNotificationActivated(int ANotifyId)
 {
 	if (FNotifies.contains(ANotifyId))
-	{
 		FNotifications->removeNotification(ANotifyId);
-	}
 }
 
 void UserMood::onNotificationRemoved(int ANotifyId)
 {
 	if (FNotifies.contains(ANotifyId))
-	{
 		FNotifies.remove(ANotifyId);
-	}
 }
 
 void UserMood::onRostersViewIndexContextMenu(const QList<IRosterIndex *> &AIndexes, quint32 ALabelId, Menu *AMenu)
@@ -445,7 +484,7 @@ void UserMood::onRostersViewIndexContextMenu(const QList<IRosterIndex *> &AIndex
 
 void UserMood::onRostersViewIndexToolTips(IRosterIndex *AIndex, quint32 ALabelId, QMap<int, QString> &AToolTips)
 {
-	if ((ALabelId==AdvancedDelegateItem::DisplayId && RosterKinds.contains(AIndex->kind())) || ALabelId == FUserMoodLabelId)
+	if ((ALabelId==AdvancedDelegateItem::DisplayId && RosterKinds.contains(AIndex->kind())) || ALabelId == FMoodLabelId)
 	{
 		Jid streamJid = AIndex->data(RDR_STREAM_JID).toString();
 		Jid contactJid = AIndex->data(RDR_PREP_BARE_JID).toString();
@@ -486,7 +525,7 @@ void UserMood::onSetMoodActionTriggered(bool)
 	{
 		Jid streamJid = action->data(ADR_STREAM_JID).toString();
 		UserMoodDialog *dialog;
-		dialog = new UserMoodDialog(this, FMoodsCatalog, streamJid);
+		dialog = new UserMoodDialog(this, FMoods, streamJid);
 		WidgetManager::showActivateRaiseWindow(dialog);
 	}
 }
@@ -501,11 +540,11 @@ void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const 
 		{
 			if(!mood.keyname.isEmpty())
 			{
-				FMoodsContacts[streamJid].insert(senderJid.pBare(), mood);
+				FContacts[streamJid].insert(senderJid.pBare(), mood);
 				onShowNotification(streamJid, senderJid);
 			}
 			else
-				FMoodsContacts[streamJid].remove(senderJid.pBare());
+				FContacts[streamJid].remove(senderJid.pBare());
 		}
 	}
 	updateDataHolder(streamJid, senderJid);
@@ -516,85 +555,75 @@ void UserMood::updateDataHolder(const Jid &streamJid, const Jid &senderJid)
 	if(FRostersModel)
 	{
 		QMultiMap<int, QVariant> findData;
-		findData.insert(RDR_PREP_BARE_JID,senderJid.pBare());
+		if (!streamJid.isEmpty())
+			findData.insert(RDR_STREAM_JID,streamJid.pFull());
+		if (!senderJid.isEmpty())
+			findData.insert(RDR_PREP_BARE_JID,senderJid.pBare());
 		findData.insert(RDR_KIND,RIK_STREAM_ROOT);
 		findData.insert(RDR_KIND,RIK_CONTACT);
 		findData.insert(RDR_KIND,RIK_CONTACTS_ROOT);
 
-		foreach (IRosterIndex *index, FRostersModel->streamRoot(streamJid)->findChilds(findData, true))
-		{
-			if(FMoodsContacts[streamJid].contains(index->data(RDR_PREP_BARE_JID).toString()))
-				FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
-			else
-				FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
-			emit rosterDataChanged(index, RDR_MOOD_NAME);
-		}
-	}
-}
-
-void UserMood::onStreamOpened(IXmppStream *AXmppStream)
-{
-	if (FRostersViewPlugin)
-	{
-		IRostersModel *model = FRostersViewPlugin->rostersView()->rostersModel();
-		IRosterIndex *index = model!=NULL ? model->streamRoot(AXmppStream->streamJid()) : NULL;
-		if (index!=NULL)
-			FRostersViewPlugin->rostersView()->insertLabel(FUserMoodLabelId,index);
+		foreach (IRosterIndex *index, FRostersModel->rootIndex()->findChilds(findData,true))
+			emit rosterDataChanged(index, RDR_USERMOOD);
 	}
 }
 
 void UserMood::onStreamClosed(IXmppStream *AXmppStream)
 {
-	Jid streamJid = AXmppStream->streamJid();
-	FMoodsContacts.remove(streamJid);
-	if(FRostersViewPlugin && FRostersModel)
-	{
-		IRosterIndex *index = FRostersModel->streamRoot(streamJid);
-		FRostersViewPlugin->rostersView()->removeLabel(FUserMoodLabelId,index);
-		emit rosterDataChanged(index, RDR_MOOD_NAME);
-	}
+	FContacts.remove(AXmppStream->streamJid());
 }
 
 void UserMood::onContactStateChanged(const Jid &streamJid, const Jid &contactJid, bool AStateOnline)
 {
-	if (!AStateOnline)
-	{
-		if (FMoodsContacts[streamJid].contains(contactJid.pBare()))
+	if (!AStateOnline && FContacts[streamJid].contains(contactJid.pBare()))
 		{
-			FMoodsContacts[streamJid].remove(contactJid.pBare());
+			FContacts[streamJid].remove(contactJid.pBare());
 			updateDataHolder(streamJid, contactJid);
 		}
+}
+
+void UserMood::onOptionsOpened()
+{
+	onOptionsChanged(Options::node(OPV_ROSTER_USER_MOOD_ICON_SHOW));
+}
+
+void UserMood::onOptionsChanged(const OptionsNode &ANode)
+{
+	if (ANode.path() == OPV_ROSTER_USER_MOOD_ICON_SHOW)
+	{
+		FMoodIconsVisible = ANode.value().toBool();
+		emit rosterLabelChanged(FMoodLabelId,NULL);
 	}
 }
 
 QIcon UserMood::moodIcon(const QString &keyname) const
 {
-	return FMoodsCatalog.value(keyname).icon;
+	return FMoods.value(keyname).icon;
 }
 
 QString UserMood::moodName(const QString &keyname) const
 {
-	return FMoodsCatalog.value(keyname).locname;
+	return FMoods.value(keyname).locname;
 }
 
 QString UserMood::contactMoodKey(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FMoodsContacts[streamJid].value(contactJid.pBare()).keyname;
+	return FContacts[streamJid].value(contactJid.pBare()).keyname;
 }
 
 QIcon UserMood::contactMoodIcon(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FMoodsContacts[streamJid].value(contactJid.pBare()).keyname).icon;
+	return FMoods.value(FContacts[streamJid].value(contactJid.pBare()).keyname).icon;
 }
 
 QString UserMood::contactMoodName(const Jid &streamJid, const Jid &contactJid) const
 {
-	return FMoodsCatalog.value(FMoodsContacts[streamJid].value(contactJid.pBare()).keyname).locname;
+	return FMoods.value(FContacts[streamJid].value(contactJid.pBare()).keyname).locname;
 }
 
 QString UserMood::contactMoodText(const Jid &streamJid, const Jid &contactJid) const
 {
-	QString text = FMoodsContacts[streamJid].value(contactJid.pBare()).text;
+	QString text = FContacts[streamJid].value(contactJid.pBare()).text;
 	return text.replace("\n", "<br>");
 }
 
@@ -603,4 +632,4 @@ void UserMood::onApplicationQuit()
 	FPEPManager->removeNodeHandler(handlerId);
 }
 
-Q_EXPORT_PLUGIN2(plg_pepmanager, UserMood)
+Q_EXPORT_PLUGIN2(plg_usermood, UserMood)

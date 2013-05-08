@@ -44,6 +44,14 @@ CHANGELOG
 =========
   LEGEND: [+]-New feature [*]-Enhancement [-]-Bug fix
 
+  v0.7
+  ------
+  [-] Options added.
+
+  v0.6
+  ------
+  [-] Small fixes, support updated vacuum-im sdk.
+
   v0.5
   ------
   [-] Fixed label on account and offline contacts.

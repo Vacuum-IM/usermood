@@ -367,6 +367,10 @@
         <source>Mood changed</source>
         <translation>Настроение изменено</translation>
     </message>
+    <message>
+        <source>Show user moods icons</source>
+        <translation>Показывать настрояния</translation>
+    </message>
 </context>
 <context>
     <name>UserMoodDialog</name>
