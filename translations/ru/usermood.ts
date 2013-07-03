@@ -12,10 +12,6 @@
         <translation>Позволяет Вам устанавливать и получать информацию о пользовательских настроениях</translation>
     </message>
     <message>
-        <source>User mood</source>
-        <translation>Настроения</translation>
-    </message>
-    <message>
         <source>Supports the exchange of information about user moods</source>
         <translation>Поддерживает обмен информацией о пользовательских настроениях</translation>
     </message>
@@ -369,7 +365,7 @@
     </message>
     <message>
         <source>Show user moods icons</source>
-        <translation>Показывать настрояния</translation>
+        <translation>Показывать настроения</translation>
     </message>
 </context>
 <context>

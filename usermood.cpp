@@ -155,7 +155,7 @@ bool UserMood::initObjects()
 
 	IDiscoFeature feature;
 	feature.active = true;
-	feature.name = tr("User mood");
+	feature.name = tr("User Mood");
 	feature.icon = IconStorage::staticStorage(RSR_STORAGE_MENUICONS)->getIcon(MNI_USERMOOD);
 	feature.description = tr("Supports the exchange of information about user moods");
 	feature.var = MOOD_PROTOCOL_URL;

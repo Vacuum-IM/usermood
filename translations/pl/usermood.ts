@@ -12,10 +12,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>User mood</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Supports the exchange of information about user moods</source>
         <translation type="unfinished"></translation>
     </message>

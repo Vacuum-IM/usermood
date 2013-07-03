@@ -12,10 +12,6 @@
             <translation>Allows you to send and receive information about user moods</translation>
         </message>
         <message>
-            <source>User mood</source>
-            <translation>User mood</translation>
-        </message>
-        <message>
             <source>Supports the exchange of information about user moods</source>
             <translation>Supports the exchange of information about user moods</translation>
         </message>
