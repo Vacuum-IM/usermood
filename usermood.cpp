@@ -440,9 +440,9 @@ void UserMood::onShowNotification(const Jid &streamJid, const Jid &senderJid)
 			notify.data.insert(NDR_POPUP_TITLE,FNotifications->contactName(streamJid, senderJid));
 			notify.data.insert(NDR_POPUP_IMAGE,FNotifications->contactAvatar(senderJid));
 			if(!contactMoodText(streamJid, senderJid).isEmpty())
-				notify.data.insert(NDR_POPUP_HTML,QString("%1:<br>%2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
+				notify.data.insert(NDR_POPUP_TEXT,QString("%1:\n%2").arg(contactMoodName(streamJid, senderJid)).arg(contactMoodText(streamJid, senderJid)));
 			else
-				notify.data.insert(NDR_POPUP_HTML,QString("%1").arg(contactMoodName(streamJid, senderJid)));
+				notify.data.insert(NDR_POPUP_TEXT,QString("%1").arg(contactMoodName(streamJid, senderJid)));
 			FNotifies.insert(FNotifications->appendNotification(notify),senderJid);
 		}
 	}
