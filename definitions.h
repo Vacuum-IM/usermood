@@ -107,7 +107,7 @@
 #define OPV_ROSTER_USER_MOOD_ICON_SHOW "roster.user.mood.icon.show"
 
 //Option Widget Order
-#define OWO_ROSTER_USER_MOOD 530
+#define OWO_ROSTER_USERMOOD 148
 
 //Roster Labels Holder Orders
 #define RLHO_USERMOOD 1030

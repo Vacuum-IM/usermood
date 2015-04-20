@@ -364,7 +364,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show user moods icons</source>
+        <source>Show contact mood icon</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

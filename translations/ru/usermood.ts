@@ -364,8 +364,8 @@
         <translation>Настроение изменено</translation>
     </message>
     <message>
-        <source>Show user moods icons</source>
-        <translation>Показывать настроения</translation>
+        <source>Show contact mood icon</source>
+        <translation>Показывать иконку настроения контакта</translation>
     </message>
 </context>
 <context>

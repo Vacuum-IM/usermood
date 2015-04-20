@@ -8,13 +8,12 @@ static const QList<int> RosterKinds = QList<int>() << RIK_CONTACT << RIK_CONTACT
 UserMood::UserMood()
 {
 	FMainWindowPlugin = NULL;
-	FPresencePlugin = NULL;
+	FPresenceManager = NULL;
 	FPEPManager = NULL;
 	FDiscovery = NULL;
-	FXmppStreams = NULL;
+	FXmppStreamManager = NULL;
 	FOptionsManager = NULL;
-	FRoster = NULL;
-	FRosterPlugin = NULL;
+	FRosterManager = NULL;
 	FRostersModel = NULL;
 	FRostersViewPlugin = NULL;
 	FNotifications = NULL;
@@ -70,37 +69,31 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 		FDiscovery = qobject_cast<IServiceDiscovery *>(plugin->instance());
 	}
 
-	plugin = APluginManager->pluginInterface("IXmppStreams").value(0, NULL);
+	plugin = APluginManager->pluginInterface("IXmppStreamManager").value(0, NULL);
 	if(plugin)
 	{
-		FXmppStreams = qobject_cast<IXmppStreams *>(plugin->instance());
-		if(FXmppStreams)
+		FXmppStreamManager = qobject_cast<IXmppStreamManager *>(plugin->instance());
+		if(FXmppStreamManager)
 		{
-			connect(FXmppStreams->instance(),SIGNAL(closed(IXmppStream *)),SLOT(onStreamClosed(IXmppStream *)));
+			connect(FXmppStreamManager->instance(),SIGNAL(streamClosed(IXmppStream *)),SLOT(onStreamClosed(IXmppStream *)));
 		}
 	}
 
-	plugin = APluginManager->pluginInterface("IPresencePlugin").value(0, NULL);
+	plugin = APluginManager->pluginInterface("IPresenceManager").value(0, NULL);
 	if(plugin)
 	{
-		FPresencePlugin = qobject_cast<IPresencePlugin *>(plugin->instance());
-		if(FPresencePlugin)
+		FPresenceManager = qobject_cast<IPresenceManager *>(plugin->instance());
+		if(FPresenceManager)
 		{
-			connect(FPresencePlugin->instance(),SIGNAL(contactStateChanged(const Jid &, const Jid &, bool)),
+			connect(FPresenceManager->instance(),SIGNAL(contactStateChanged(const Jid &, const Jid &, bool)),
 					SLOT(onContactStateChanged(const Jid &, const Jid &, bool)));
 		}
 	}
 
-	plugin = APluginManager->pluginInterface("IRoster").value(0, NULL);
-	if(plugin)
-	{
-		FRoster = qobject_cast<IRoster *>(plugin->instance());
-	}
-
-	plugin = APluginManager->pluginInterface("IRosterPlugin").value(0,NULL);
+	plugin = APluginManager->pluginInterface("IRosterManager").value(0,NULL);
 	if (plugin)
 	{
-		FRosterPlugin = qobject_cast<IRosterPlugin *>(plugin->instance());
+		FRosterManager = qobject_cast<IRosterManager *>(plugin->instance());
 	}
 
 	plugin = APluginManager->pluginInterface("IRostersModel").value(0, NULL);
@@ -146,7 +139,7 @@ bool UserMood::initConnections(IPluginManager *APluginManager, int &AInitOrder)
 
 	connect(APluginManager->instance(), SIGNAL(aboutToQuit()), this, SLOT(onApplicationQuit()));
 
-	return FMainWindowPlugin != NULL && FRosterPlugin !=NULL && FPEPManager !=NULL;
+	return FMainWindowPlugin != NULL && FRosterManager !=NULL && FPEPManager !=NULL;
 }
 
 bool UserMood::initObjects()
@@ -194,7 +187,7 @@ bool UserMood::initObjects()
 
 	if (FOptionsManager)
 	{
-		FOptionsManager->insertOptionsHolder(this);
+		FOptionsManager->insertOptionsDialogHolder(this);
 	}
 
 	addMood(MOOD_NULL, tr("Without mood"));
@@ -289,12 +282,12 @@ bool UserMood::initSettings()
 	return true;
 }
 
-QMultiMap<int, IOptionsWidget *> UserMood::optionsWidgets(const QString &ANodeId, QWidget *AParent)
+QMultiMap<int, IOptionsDialogWidget *> UserMood::optionsDialogWidgets(const QString &ANodeId, QWidget *AParent)
 {
-	QMultiMap<int, IOptionsWidget *> widgets;
-	if (FOptionsManager && ANodeId == OPN_ROSTER)
+	QMultiMap<int, IOptionsDialogWidget *> widgets;
+	if (FOptionsManager && ANodeId==OPN_ROSTERVIEW)
 	{
-		widgets.insertMulti(OWO_ROSTER_USER_MOOD, FOptionsManager->optionsNodeWidget(Options::node(OPV_ROSTER_USER_MOOD_ICON_SHOW),tr("Show user moods icons"),AParent));
+		widgets.insertMulti(OWO_ROSTER_USERMOOD, FOptionsManager->newOptionsDialogWidget(Options::node(OPV_ROSTER_USER_MOOD_ICON_SHOW),tr("Show contact mood icon"),AParent));
 	}
 	return widgets;
 }
@@ -468,7 +461,7 @@ void UserMood::onRostersViewIndexContextMenu(const QList<IRosterIndex *> &AIndex
 		if(index->kind() == RIK_STREAM_ROOT)
 		{
 			Jid streamJid = index->data(RDR_STREAM_JID).toString();
-			IPresence *presence = FPresencePlugin != NULL ? FPresencePlugin->findPresence(streamJid) : NULL;
+			IPresence *presence = FPresenceManager != NULL ? FPresenceManager->findPresence(streamJid) : NULL;
 			if(presence && presence->isOpen())
 			{
 				int show = index->data(RDR_SHOW).toInt();
@@ -535,8 +528,8 @@ void UserMood::setContactMood(const Jid &streamJid, const Jid &senderJid, const 
 	if((contactMoodKey(streamJid, senderJid) != mood.keyname) ||
 			contactMoodText(streamJid, senderJid) != mood.text)
 	{
-		IRoster *roster = FRosterPlugin!=NULL ? FRosterPlugin->findRoster(streamJid) : NULL;
-		if((roster!=NULL && roster->rosterItem(senderJid).isValid) || streamJid.pBare() == senderJid.pBare())
+		IRoster *roster = FRosterManager!=NULL ? FRosterManager->findRoster(streamJid) : NULL;
+		if((roster!=NULL && !roster->findItem(senderJid).isNull()) || streamJid.pBare() == senderJid.pBare())
 		{
 			if(!mood.keyname.isEmpty())
 			{

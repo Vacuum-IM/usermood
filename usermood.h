@@ -10,12 +10,12 @@
 #include <interfaces/ioptionsmanager.h>
 #include <interfaces/ipepmanager.h>
 #include <interfaces/ipluginmanager.h>
-#include <interfaces/ipresence.h>
-#include <interfaces/iroster.h>
+#include <interfaces/ipresencemanager.h>
+#include <interfaces/irostermanager.h>
 #include <interfaces/irostersmodel.h>
 #include <interfaces/irostersview.h>
 #include <interfaces/iservicediscovery.h>
-#include <interfaces/ixmppstreams.h>
+#include <interfaces/ixmppstreammanager.h>
 
 #include <definitions/menuicons.h>
 #include <definitions/notificationdataroles.h>
@@ -42,11 +42,11 @@ class UserMood :
 	public IUserMood,
 	public IRosterDataHolder,
 	public IRostersLabelHolder,
-	public IOptionsHolder,
+	public IOptionsDialogHolder,
 	public IPEPHandler
 {
 	Q_OBJECT;
-	Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IRostersLabelHolder IOptionsHolder IPEPHandler);
+	Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IRostersLabelHolder IOptionsDialogHolder IPEPHandler);
 
 public:
 	UserMood();
@@ -60,7 +60,7 @@ public:
 	virtual bool initSettings();
 	virtual bool startPlugin() { return true; }
 	//IOptionsHolder
-	virtual QMultiMap<int, IOptionsWidget *> optionsWidgets(const QString &ANodeId, QWidget *AParent);
+	virtual QMultiMap<int, IOptionsDialogWidget *> optionsDialogWidgets(const QString &ANodeId, QWidget *AParent);
 	//IRosterDataHolder
 	virtual QList<int> rosterDataRoles(int AOrder) const;
 	virtual QVariant rosterData(int AOrder, const IRosterIndex *AIndex, int ARole) const;
@@ -114,13 +114,12 @@ protected:
 
 private:
 	IMainWindowPlugin *FMainWindowPlugin;
-	IPresencePlugin *FPresencePlugin;
+	IPresenceManager *FPresenceManager;
 	IPEPManager *FPEPManager;
 	IServiceDiscovery *FDiscovery;
-	IXmppStreams *FXmppStreams;
+	IXmppStreamManager *FXmppStreamManager;
 	IOptionsManager *FOptionsManager;
-	IRoster *FRoster;
-	IRosterPlugin *FRosterPlugin;
+	IRosterManager *FRosterManager;
 	IRostersModel *FRostersModel;
 	IRostersViewPlugin *FRostersViewPlugin;
 	INotifications *FNotifications;
