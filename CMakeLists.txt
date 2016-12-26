@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.2)
 
 project(usermood-plugin)
 set(PLUGIN_NAME usermood)
@@ -13,6 +13,9 @@ include_directories("${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}")
 include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
 include("${CMAKE_SOURCE_DIR}/translations/languages.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/plugin.cmake")
+
+find_package(Qt5 COMPONENTS Widgets Xml REQUIRED)
+qt5_use_modules(${PLUGIN_NAME} Widgets Xml)
 
 install(DIRECTORY "resources/menuicons" DESTINATION "${INSTALL_RESOURCES}")
 install(DIRECTORY "resources/moodicons" DESTINATION "${INSTALL_RESOURCES}")

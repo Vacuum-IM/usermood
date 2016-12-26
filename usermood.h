@@ -47,6 +47,7 @@ class UserMood :
 {
 	Q_OBJECT;
 	Q_INTERFACES(IPlugin IUserMood IRosterDataHolder IRostersLabelHolder IOptionsDialogHolder IPEPHandler);
+	Q_PLUGIN_METADATA(IID "org.vacuum-im.plugins.UserMood");
 
 public:
 	UserMood();

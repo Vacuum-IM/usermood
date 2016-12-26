@@ -624,5 +624,3 @@ void UserMood::onApplicationQuit()
 {
 	FPEPManager->removeNodeHandler(handlerId);
 }
-
-Q_EXPORT_PLUGIN2(plg_usermood, UserMood)
