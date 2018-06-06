@@ -15,7 +15,7 @@ include("${CMAKE_SOURCE_DIR}/translations/languages.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/plugin.cmake")
 
 find_package(Qt5 COMPONENTS Widgets Xml REQUIRED)
-qt5_use_modules(${PLUGIN_NAME} Widgets Xml)
+target_link_libraries(${PLUGIN_NAME} Qt5::Widgets Qt5::Xml)
 
 install(DIRECTORY "resources/menuicons" DESTINATION "${INSTALL_RESOURCES}")
 install(DIRECTORY "resources/moodicons" DESTINATION "${INSTALL_RESOURCES}")
