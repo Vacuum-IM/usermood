@@ -38,7 +38,7 @@ void UserMood::pluginInfo(IPluginInfo *APluginInfo)
 {
 	APluginInfo->name = tr("User Mood");
 	APluginInfo->description = tr("Allows you to send and receive information about user moods");
-	APluginInfo->version = "0.7";
+	APluginInfo->version = "0.8";
 	APluginInfo->author = "Alexey Ivanov aka krab";
 	APluginInfo->homePage = "http://code.google.com/p/vacuum-plugins";
 	APluginInfo->dependences.append(PEPMANAGER_UUID);
@@ -624,5 +624,3 @@ void UserMood::onApplicationQuit()
 {
 	FPEPManager->removeNodeHandler(handlerId);
 }
-
-Q_EXPORT_PLUGIN2(plg_usermood, UserMood)

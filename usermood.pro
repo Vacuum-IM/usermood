@@ -3,7 +3,7 @@ include(qmake/config.inc)
 
 #Project configuration
 TARGET              = usermood
-QT                  = core gui xml
+QT                  = core gui widgets xml
 include(usermood.pri)
 
 #Default progect configuration
